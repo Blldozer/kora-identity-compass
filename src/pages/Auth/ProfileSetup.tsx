@@ -40,10 +40,10 @@ const ProfileSetup = () => {
 
       if (updateError) throw updateError;
 
-      // Optional: Insert additional profile data into a custom profiles table
+      // Insert profile data
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert({
+        .upsert({
           id: user.id,
           first_name: firstName,
           last_name: lastName
@@ -108,4 +108,4 @@ const ProfileSetup = () => {
   );
 };
 
-export default Register;
+export default ProfileSetup;
