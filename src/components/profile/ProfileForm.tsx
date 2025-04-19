@@ -1,9 +1,20 @@
 
 import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { User, Mail, Phone, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { User, Mail, Phone, Save } from 'lucide-react';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { profileFormSchema, type ProfileFormValues } from '@/lib/validations/profile';
 
 interface ProfileFormProps {
   email: string;
@@ -28,71 +39,118 @@ export const ProfileForm = ({
   onSave,
   saving
 }: ProfileFormProps) => {
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      firstName,
+      lastName,
+      phoneNumber,
+      email,
+    },
+  });
+
+  const onSubmit = (data: ProfileFormValues) => {
+    onFirstNameChange(data.firstName);
+    onLastNameChange(data.lastName);
+    onPhoneChange(data.phoneNumber);
+    onSave();
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="firstName">First Name</Label>
-          </div>
-          <Input
-            id="firstName"
-            value={firstName}
-            onChange={(e) => onFirstNameChange(e.target.value)}
-            placeholder="Enter your first name"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="firstName"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <FormLabel>First Name</FormLabel>
+                </div>
+                <FormControl>
+                  <Input 
+                    placeholder="Enter your first name"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <FormLabel>Last Name</FormLabel>
+                </div>
+                <FormControl>
+                  <Input 
+                    placeholder="Enter your last name"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
         
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="lastName">Last Name</Label>
-          </div>
-          <Input
-            id="lastName"
-            value={lastName}
-            onChange={(e) => onLastNameChange(e.target.value)}
-            placeholder="Enter your last name"
-          />
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Mail className="h-4 w-4 text-muted-foreground" />
-          <Label htmlFor="email">Email</Label>
-        </div>
-        <Input
-          id="email"
-          value={email}
-          disabled
-          className="bg-gray-100"
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <FormLabel>Email</FormLabel>
+              </div>
+              <FormControl>
+                <Input
+                  {...field}
+                  disabled
+                  className="bg-gray-100"
+                />
+              </FormControl>
+              <p className="text-xs text-muted-foreground">You cannot change your email address</p>
+            </FormItem>
+          )}
         />
-        <p className="text-xs text-muted-foreground">You cannot change your email address</p>
-      </div>
-      
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Phone className="h-4 w-4 text-muted-foreground" />
-          <Label htmlFor="phone">Phone Number</Label>
-        </div>
-        <Input
-          id="phone"
-          value={phoneNumber}
-          onChange={(e) => onPhoneChange(e.target.value)}
-          placeholder="Enter your phone number"
+        
+        <FormField
+          control={form.control}
+          name="phoneNumber"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <FormLabel>Phone Number</FormLabel>
+              </div>
+              <FormControl>
+                <Input 
+                  placeholder="Enter your phone number"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <Button 
-        className="w-full flex items-center gap-2 justify-center" 
-        onClick={onSave}
-        disabled={saving}
-      >
-        <Save className="h-4 w-4" />
-        {saving ? 'Saving...' : 'Save Profile'}
-      </Button>
-    </div>
+        
+        <Button 
+          type="submit"
+          className="w-full flex items-center gap-2 justify-center" 
+          disabled={saving}
+        >
+          <Save className="h-4 w-4" />
+          {saving ? 'Saving...' : 'Save Profile'}
+        </Button>
+      </form>
+    </Form>
   );
 };
