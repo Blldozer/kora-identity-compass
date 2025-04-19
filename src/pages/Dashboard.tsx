@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { user, home, settings } from 'lucide-react';
+import { User, Home, Settings } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ const Dashboard = () => {
           </header>
 
           <Alert>
-            <home className="h-4 w-4" />
+            <Home className="h-4 w-4" />
             <AlertTitle>Welcome to Kora Financial Health Platform</AlertTitle>
             <AlertDescription>
               Your financial dashboard is now ready. Complete your profile to get personalized financial insights.
@@ -69,7 +69,7 @@ const Dashboard = () => {
                   className="flex items-center gap-2" 
                   onClick={handleEditProfile}
                 >
-                  <user className="h-4 w-4" />
+                  <User className="h-4 w-4" />
                   View Profile
                 </Button>
               </CardContent>
@@ -86,7 +86,7 @@ const Dashboard = () => {
                   className="flex items-center gap-2" 
                   onClick={handleEditProfile}
                 >
-                  <settings className="h-4 w-4" />
+                  <Settings className="h-4 w-4" />
                   Complete Profile
                 </Button>
               </CardContent>

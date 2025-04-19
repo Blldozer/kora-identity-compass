@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { eye, eyeOff, key } from 'lucide-react';
+import { Eye, EyeOff, Key } from 'lucide-react';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -105,7 +105,7 @@ const ResetPassword = () => {
               <div className="space-y-2">
                 <Label htmlFor="password">New Password</Label>
                 <div className="relative">
-                  <key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input 
                     type={showPassword ? "text" : "password"} 
                     id="password"
@@ -121,7 +121,7 @@ const ResetPassword = () => {
                     className="absolute right-3 top-3 text-muted-foreground"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <eyeOff className="h-4 w-4" /> : <eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -129,7 +129,7 @@ const ResetPassword = () => {
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
-                  <key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input 
                     type={showPassword ? "text" : "password"} 
                     id="confirmPassword"

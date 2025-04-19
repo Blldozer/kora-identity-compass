@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -76,7 +76,7 @@ const ForgotPassword = () => {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input 
                     type="email" 
                     id="email"

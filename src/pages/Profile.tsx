@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { user, upload, phone, mail, save, home } from 'lucide-react';
+import { User, Upload, Phone, Mail, Save, Home } from 'lucide-react';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -119,7 +119,7 @@ const Profile = () => {
           className="mb-6 flex items-center gap-2"
           onClick={() => navigate('/dashboard')}
         >
-          <home className="h-4 w-4" />
+          <Home className="h-4 w-4" />
           Back to Dashboard
         </Button>
         
@@ -136,7 +136,7 @@ const Profile = () => {
                     {getInitials()}
                   </AvatarFallback>
                   <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <upload className="h-6 w-6 text-white" />
+                    <Upload className="h-6 w-6 text-white" />
                   </div>
                 </Avatar>
                 <input 
@@ -157,7 +157,7 @@ const Profile = () => {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <user className="h-4 w-4 text-muted-foreground" />
+                    <User className="h-4 w-4 text-muted-foreground" />
                     <Label htmlFor="firstName">First Name</Label>
                   </div>
                   <Input
@@ -170,7 +170,7 @@ const Profile = () => {
                 
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <user className="h-4 w-4 text-muted-foreground" />
+                    <User className="h-4 w-4 text-muted-foreground" />
                     <Label htmlFor="lastName">Last Name</Label>
                   </div>
                   <Input
@@ -184,7 +184,7 @@ const Profile = () => {
               
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <mail className="h-4 w-4 text-muted-foreground" />
+                  <Mail className="h-4 w-4 text-muted-foreground" />
                   <Label htmlFor="email">Email</Label>
                 </div>
                 <Input
@@ -198,7 +198,7 @@ const Profile = () => {
               
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <phone className="h-4 w-4 text-muted-foreground" />
+                  <Phone className="h-4 w-4 text-muted-foreground" />
                   <Label htmlFor="phone">Phone Number</Label>
                 </div>
                 <Input
@@ -214,7 +214,7 @@ const Profile = () => {
                 onClick={handleSaveProfile}
                 disabled={saving}
               >
-                <save className="h-4 w-4" />
+                <Save className="h-4 w-4" />
                 {saving ? 'Saving...' : 'Save Profile'}
               </Button>
             </div>

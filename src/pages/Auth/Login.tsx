@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { mail, key, eye, eyeOff } from 'lucide-react';
+import { Mail, Key, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -46,7 +46,7 @@ const Login = () => {
           <div>
             <Label htmlFor="email">Email</Label>
             <div className="relative">
-              <mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input 
                 type="email" 
                 id="email"
@@ -73,7 +73,7 @@ const Login = () => {
               </Button>
             </div>
             <div className="relative">
-              <key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input 
                 type={showPassword ? "text" : "password"} 
                 id="password"
@@ -88,7 +88,7 @@ const Login = () => {
                 className="absolute right-3 top-3 text-muted-foreground"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <eyeOff className="h-4 w-4" /> : <eye className="h-4 w-4" />}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
