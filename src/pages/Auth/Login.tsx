@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
+import { mail, key, eye, eyeOff } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -43,25 +45,52 @@ const Login = () => {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <Label htmlFor="email">Email</Label>
-            <Input 
-              type="email" 
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required 
-              placeholder="Enter your email"
-            />
+            <div className="relative">
+              <mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input 
+                type="email" 
+                id="email"
+                className="pl-10"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+                placeholder="Enter your email"
+              />
+            </div>
           </div>
           <div>
-            <Label htmlFor="password">Password</Label>
-            <Input 
-              type="password" 
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required 
-              placeholder="Enter your password"
-            />
+            <div className="flex justify-between items-center">
+              <Label htmlFor="password">Password</Label>
+              <Button 
+                variant="link" 
+                className="p-0 h-auto text-sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/auth/forgot-password');
+                }}
+              >
+                Forgot Password?
+              </Button>
+            </div>
+            <div className="relative">
+              <key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input 
+                type={showPassword ? "text" : "password"} 
+                id="password"
+                className="pl-10 pr-10"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required 
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-3 text-muted-foreground"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <eyeOff className="h-4 w-4" /> : <eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
           <Button 
             type="submit" 

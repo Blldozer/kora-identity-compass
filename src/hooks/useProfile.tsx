@@ -10,6 +10,8 @@ export type Profile = {
   last_name: string | null;
   phone: string | null;
   avatar_url: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 export function useProfile(userId?: string) {
@@ -45,7 +47,7 @@ export function useProfile(userId?: string) {
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!userId) return;
+    if (!userId) return null;
 
     try {
       const { data, error } = await supabase
@@ -73,10 +75,40 @@ export function useProfile(userId?: string) {
     }
   };
 
+  const uploadAvatar = async (file: File): Promise<string | null> => {
+    if (!userId) return null;
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${userId}-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+        
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+        
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload avatar",
+        variant: "destructive"
+      });
+      return null;
+    }
+  };
+
   return {
     profile,
     loading,
     updateProfile,
+    uploadAvatar,
     refreshProfile: () => userId && fetchProfile(userId)
   };
 }
