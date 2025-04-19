@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
@@ -36,15 +35,19 @@ export const useAuth = () => {
 
   const signUp = async (email: string, password: string, metadata?: object) => {
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { 
-        data: metadata 
-      }
-    });
-    setLoading(false);
-    return { data, error };
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { 
+          data: metadata,
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      return { data, error };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signIn = async (email: string, password: string) => {
