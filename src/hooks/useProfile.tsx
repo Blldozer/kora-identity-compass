@@ -45,18 +45,38 @@ export function useProfile(userId?: string) {
         if (authError) throw authError;
         
         // Create a new profile with the required id property
-        const { data: createdProfile, error: createError } = await supabase
-          .from('profiles')
-          .insert({
-            id: id,
-            email: userData.user?.email || null
-          })
-          .select()
-          .single();
+        try {
+          const { data: createdProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: id,
+              email: userData.user?.email || null
+            })
+            .select()
+            .single();
+            
+          if (createError) {
+            // Handle potential unique constraint violation
+            if (createError.code === '23505') {
+              toast({
+                title: 'Profile Creation Error',
+                description: 'A profile with this email already exists.',
+                variant: 'destructive'
+              });
+              return;
+            }
+            throw createError;
+          }
           
-        if (createError) throw createError;
-        
-        setProfile(createdProfile);
+          setProfile(createdProfile);
+        } catch (insertError) {
+          console.error('Error inserting profile:', insertError);
+          toast({
+            title: "Error",
+            description: "Failed to create profile",
+            variant: "destructive"
+          });
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
