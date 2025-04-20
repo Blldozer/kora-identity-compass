@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuthLockout } from './useAuthLockout';
 import { useAuthSession } from './useAuthSession';
 import { clearSecureStorage } from '@/utils/secureStorage';
+import { AuthResult, SignUpMetadata } from '@/types/auth';
 
 export const useAuth = () => {
   const { 
@@ -42,7 +43,11 @@ export const useAuth = () => {
     };
   }, [checkAccountLock, resetFailedAttempts, updateSession, checkCachedSession]);
 
-  const signUp = async (email: string, password: string, metadata?: object) => {
+  const signUp = async (
+    email: string, 
+    password: string, 
+    metadata?: SignUpMetadata
+  ): Promise<AuthResult> => {
     setLoading(true);
     try {
       if (!email || !password) {
@@ -70,7 +75,8 @@ export const useAuth = () => {
       return { 
         data: null, 
         error: { 
-          message: error.message || 'An error occurred during registration' 
+          message: error.message || 'An error occurred during registration',
+          code: error.code
         }
       };
     } finally {
@@ -78,75 +84,138 @@ export const useAuth = () => {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<AuthResult> => {
     if (checkAccountLock()) {
       return {
         data: null,
         error: {
-          message: 'Too many failed login attempts. Please try again in 15 minutes.'
+          message: 'Too many failed login attempts. Please try again in 15 minutes.',
+          code: 'ACCOUNT_LOCKED'
         }
       };
     }
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-    
-    setLoading(false);
-    
-    if (error) {
-      recordFailedAttempt();
-      return { data, error };
-    }
-    
-    resetFailedAttempts();
-    return { data, error };
-  };
-
-  const signOut = async () => {
-    setLoading(true);
-    await supabase.auth.signOut();
-    removeSecurely('user-session');
-    setLoading(false);
-  };
-
-  const resetPassword = async (email: string) => {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    });
-    return { data, error };
-  };
-
-  const updatePassword = async (newPassword: string) => {
-    const { data, error } = await supabase.auth.updateUser({
-      password: newPassword
-    });
-    
-    if (!error && data.user) {
-      const { data: sessionData } = await supabase.auth.getSession();
-      updateSession(sessionData.session);
-    }
-    
-    return { data, error };
-  };
-
-  const signInWithGoogle = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        recordFailedAttempt();
+        return { 
+          data: null, 
+          error: {
+            message: error.message,
+            code: error.status?.toString()
+          }
+        };
       }
-    });
-    setLoading(false);
-    return { error };
+      
+      resetFailedAttempts();
+      return { data, error: null };
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || 'An error occurred during login',
+          code: error.code
+        }
+      };
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const clearAuthData = async () => {
-    await signOut();
-    clearSecureStorage();
+  const signOut = async (): Promise<AuthResult> => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      clearSecureStorage();
+      return { data: true, error: null };
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || 'An error occurred during sign out',
+          code: error.code
+        }
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (email: string): Promise<AuthResult> => {
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || 'An error occurred while resetting password',
+          code: error.code
+        }
+      };
+    }
+  };
+
+  const updatePassword = async (newPassword: string): Promise<AuthResult> => {
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) throw error;
+      
+      if (data.user) {
+        const { data: sessionData } = await supabase.auth.getSession();
+        updateSession(sessionData.session);
+      }
+      
+      return { data, error: null };
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || 'An error occurred while updating password',
+          code: error.code
+        }
+      };
+    }
+  };
+
+  const signInWithGoogle = async (): Promise<AuthResult> => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      
+      if (error) throw error;
+      return { data: true, error: null };
+    } catch (error: any) {
+      return {
+        data: null,
+        error: {
+          message: error.message || 'An error occurred during Google sign in',
+          code: error.code
+        }
+      };
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {
@@ -160,6 +229,5 @@ export const useAuth = () => {
     signInWithGoogle,
     resetPassword,
     updatePassword,
-    clearAuthData
   };
 };

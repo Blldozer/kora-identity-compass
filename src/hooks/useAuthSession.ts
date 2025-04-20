@@ -4,6 +4,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { saveSecurely, getSecurely, removeSecurely } from '@/utils/secureStorage';
 import { SESSION_TIMEOUT } from '@/constants/auth';
+import { AuthResult } from '@/types/auth';
 
 export const useAuthSession = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -21,22 +22,36 @@ export const useAuthSession = () => {
     }
   }, []);
 
-  const checkCachedSession = useCallback(async () => {
-    const cachedSession = getSecurely('user-session');
-    
-    if (cachedSession) {
-      try {
-        const parsedSession = JSON.parse(cachedSession);
-        setSession(parsedSession);
-        setUser(parsedSession.user);
-      } catch (e) {
-        console.error('Error parsing cached session:', e);
+  const checkCachedSession = useCallback(async (): Promise<AuthResult<Session>> => {
+    try {
+      const cachedSession = getSecurely('user-session');
+      
+      if (cachedSession) {
+        try {
+          const parsedSession = JSON.parse(cachedSession);
+          setSession(parsedSession);
+          setUser(parsedSession.user);
+        } catch (e) {
+          console.error('Error parsing cached session:', e);
+        }
       }
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      updateSession(session);
+      setLoading(false);
+      
+      return { data: session, error: null };
+    } catch (error: any) {
+      console.error('Error checking session:', error);
+      setLoading(false);
+      return {
+        data: null,
+        error: {
+          message: error.message || 'Failed to check session',
+          code: error.code
+        }
+      };
     }
-    
-    const { data } = await supabase.auth.getSession();
-    updateSession(data.session);
-    setLoading(false);
   }, [updateSession]);
 
   return {
