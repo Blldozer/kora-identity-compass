@@ -44,14 +44,13 @@ export function useProfile(userId?: string) {
         
         if (authError) throw authError;
         
-        const newProfile: Partial<Profile> = {
-          id,
-          email: userData.user?.email || null,
-        };
-        
+        // Create a new profile with the required id property
         const { data: createdProfile, error: createError } = await supabase
           .from('profiles')
-          .insert(newProfile)
+          .insert({
+            id: id,
+            email: userData.user?.email || null
+          })
           .select()
           .single();
           
