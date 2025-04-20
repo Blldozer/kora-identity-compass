@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChartBar, TrendingUp, ShieldCheck, Search, Wallet, PiggyBank } from 'lucide-react';
 
 const slides = [
@@ -90,6 +90,14 @@ const slides = [
 const StatsCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
+    }, 5000); // Change slide every 5 seconds
+
+    return () => clearInterval(timer); // Cleanup on unmount
+  }, []);
+
   return (
     <div className="text-center px-4">
       <div className="min-h-[320px] flex items-center justify-center">
@@ -124,3 +132,4 @@ const StatsCarousel = () => {
 };
 
 export default StatsCarousel;
+
