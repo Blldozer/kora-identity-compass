@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Progress } from "@/components/ui/progress";
 
 interface PasswordStrengthProps {
   password: string;
@@ -29,19 +28,18 @@ export const PasswordStrength = ({ password }: PasswordStrengthProps) => {
   };
 
   const getStrengthColor = (strength: number): string => {
-    if (strength <= 20) return 'bg-red-500';
-    if (strength <= 40) return 'bg-orange-500';
-    if (strength <= 60) return 'bg-yellow-500';
-    if (strength <= 80) return 'bg-green-400';
-    return 'bg-green-500';
+    if (strength <= 20) return 'text-red-500';
+    if (strength <= 40) return 'text-orange-500';
+    if (strength <= 60) return 'text-yellow-500';
+    if (strength <= 80) return 'text-green-400';
+    return 'text-green-500';
   };
 
   const strength = calculateStrength(password);
 
   return (
     <div className="space-y-2">
-      <Progress value={strength} className={getStrengthColor(strength)} />
-      <p className="text-sm text-muted-foreground">
+      <p className={`text-sm font-medium ${getStrengthColor(strength)}`}>
         Password Strength: {getStrengthText(strength)}
       </p>
       <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1">
@@ -54,3 +52,4 @@ export const PasswordStrength = ({ password }: PasswordStrengthProps) => {
     </div>
   );
 };
+
