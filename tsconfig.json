@@ -1,9 +1,5 @@
 {
   "files": ["types/vite-env.d.ts"],
-  "references": [
-    { "path": "tsconfig.app.json" },
-    { "path": "tsconfig.node.json" }
-  ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
@@ -15,7 +11,8 @@
     "allowJs": true,
     "noUnusedLocals": false,
     "strictNullChecks": false,
-    "typeRoots": ["node_modules/@types", "types"]
+    "typeRoots": ["node_modules/@types", "types"],
+    "composite": true
   },
   "include": ["types/vite-env.d.ts"]
 }

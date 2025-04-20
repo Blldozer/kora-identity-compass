@@ -12,6 +12,7 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
+    "outDir": "./dist-node",
 
     /* Linting */
     "strict": true,
