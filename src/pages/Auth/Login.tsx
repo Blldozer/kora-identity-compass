@@ -28,24 +28,37 @@ const Login = () => {
       const lockData = localStorage.getItem('kora-auth-lock');
       if (lockData) {
         try {
-          const { timestamp } = JSON.parse(atob(lockData));
-          const updateTimer = () => {
-            const elapsed = Date.now() - timestamp;
-            const lockoutDuration = 15 * 60 * 1000; // 15 minutes
-            const remaining = Math.max(0, lockoutDuration - elapsed);
-            
-            if (remaining <= 0) {
-              setLockoutRemaining(null);
-              window.location.reload();
-              return;
+          // Use getSecurely from useAuth hook implementation
+          const decryptValue = (val: string) => {
+            try {
+              return atob(val);
+            } catch (e) {
+              console.error('Error decoding lockout data:', e);
+              return null;
             }
-            
-            setLockoutRemaining(Math.ceil(remaining / 60000)); // Convert to minutes
           };
           
-          updateTimer();
-          const interval = setInterval(updateTimer, 60000); // Update every minute
-          return () => clearInterval(interval);
+          const decrypted = decryptValue(lockData);
+          if (decrypted) {
+            const { timestamp } = JSON.parse(JSON.parse(decrypted).value);
+            const updateTimer = () => {
+              const elapsed = Date.now() - timestamp;
+              const lockoutDuration = 15 * 60 * 1000; // 15 minutes
+              const remaining = Math.max(0, lockoutDuration - elapsed);
+              
+              if (remaining <= 0) {
+                setLockoutRemaining(null);
+                window.location.reload();
+                return;
+              }
+              
+              setLockoutRemaining(Math.ceil(remaining / 60000)); // Convert to minutes
+            };
+            
+            updateTimer();
+            const interval = setInterval(updateTimer, 60000); // Update every minute
+            return () => clearInterval(interval);
+          }
         } catch (e) {
           console.error('Error parsing lockout data:', e);
         }

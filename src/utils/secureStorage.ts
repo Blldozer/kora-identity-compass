@@ -10,20 +10,21 @@ const getEncryptionKey = (): string => {
     navigator.userAgent,
     navigator.language,
     window.screen.colorDepth,
-    window.screen.width + 'x' + window.screen.height
+    window.screen.width + 'x' + window.screen.height,
+    new Date().getTimezoneOffset()
   ].join('|');
   
-  // Simple hash function
-  let hash = 0;
+  // More robust hash function (modified djb2)
+  let hash = 5381;
   for (let i = 0; i < browserInfo.length; i++) {
     const char = browserInfo.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+    hash = ((hash << 5) + hash) + char;
   }
   
   return 'kora-finance-key-' + Math.abs(hash).toString(16);
 };
 
+// Generate encryption key only once per session
 const ENCRYPTION_KEY = getEncryptionKey();
 
 /**
@@ -34,13 +35,23 @@ const encrypt = (text: string): string => {
   let result = '';
   const key = ENCRYPTION_KEY;
   
-  for (let i = 0; i < text.length; i++) {
-    const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+  // Add a random salt prefix to prevent identical outputs for identical inputs
+  const salt = Math.random().toString(36).substring(2, 10);
+  const saltedText = salt + text;
+  
+  for (let i = 0; i < saltedText.length; i++) {
+    const charCode = saltedText.charCodeAt(i) ^ key.charCodeAt(i % key.length);
     result += String.fromCharCode(charCode);
   }
   
   // Add additional obfuscation with base64
-  return btoa(result);
+  try {
+    return btoa(result);
+  } catch (e) {
+    console.error('Error during encryption:', e);
+    // Fallback for non-ASCII characters
+    return btoa(encodeURIComponent(result));
+  }
 };
 
 /**
@@ -49,7 +60,14 @@ const encrypt = (text: string): string => {
 const decrypt = (encoded: string): string => {
   try {
     // Decode base64
-    const decoded = atob(encoded);
+    let decoded;
+    try {
+      decoded = atob(encoded);
+    } catch (e) {
+      // Fallback for non-ASCII characters
+      decoded = decodeURIComponent(atob(encoded));
+    }
+    
     let result = '';
     const key = ENCRYPTION_KEY;
     
@@ -58,7 +76,8 @@ const decrypt = (encoded: string): string => {
       result += String.fromCharCode(charCode);
     }
     
-    return result;
+    // Remove the random salt prefix (first 8 characters)
+    return result.substring(8);
   } catch (error) {
     console.error('Error decrypting data:', error);
     return '';
@@ -72,7 +91,8 @@ export const saveSecurely = (key: string, value: string, expiresInHours = 24): v
   try {
     const data = {
       value,
-      expires: expiresInHours > 0 ? Date.now() + (expiresInHours * 60 * 60 * 1000) : 0
+      expires: expiresInHours > 0 ? Date.now() + (expiresInHours * 60 * 60 * 1000) : 0,
+      created: Date.now()
     };
     const encryptedValue = encrypt(JSON.stringify(data));
     localStorage.setItem(`kora-${key}`, encryptedValue);
