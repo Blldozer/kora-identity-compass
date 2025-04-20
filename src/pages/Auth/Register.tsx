@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
+import { Eye, EyeOff } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -20,6 +21,9 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { signUp, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -37,7 +41,8 @@ const Register = () => {
 
     const { error } = await signUp(email, password, {
       first_name: firstName,
-      last_name: lastName
+      last_name: lastName,
+      phone_number: phoneNumber
     });
     
     if (error) {
@@ -86,6 +91,17 @@ const Register = () => {
               </div>
             </div>
             <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <Input 
+                type="tel"
+                id="phoneNumber"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="+1234567890"
+                required 
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input 
                 type="email" 
@@ -97,25 +113,47 @@ const Register = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input 
-                type="password" 
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required 
-                minLength={8}
-              />
+              <div className="relative">
+                <Input 
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required 
+                  minLength={8}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input 
-                type="password" 
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required 
-                minLength={8}
-              />
+              <div className="relative">
+                <Input 
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required 
+                  minLength={8}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
             <Button 
               type="submit" 
