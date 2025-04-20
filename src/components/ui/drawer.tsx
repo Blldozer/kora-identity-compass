@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 
@@ -14,11 +15,31 @@ const Drawer = ({
 )
 Drawer.displayName = "Drawer"
 
-const DrawerTrigger = DrawerPrimitive.Trigger
+// Add proper type annotations to prevent TypeScript errors
+const DrawerTrigger = React.forwardRef<
+  React.ElementRef<typeof DrawerPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Trigger>
+>(({ ...props }, ref) => (
+  <DrawerPrimitive.Trigger ref={ref} {...props} />
+))
+DrawerTrigger.displayName = "DrawerTrigger"
 
-const DrawerPortal = DrawerPrimitive.Portal
+// Add proper type annotation for DrawerPortal
+const DrawerPortal = ({
+  ...props
+}: React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Portal>) => (
+  <DrawerPrimitive.Portal {...props} />
+)
+DrawerPortal.displayName = "DrawerPortal"
 
-const DrawerClose = DrawerPrimitive.Close
+// Add proper type annotation for DrawerClose
+const DrawerClose = React.forwardRef<
+  React.ElementRef<typeof DrawerPrimitive.Close>,
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Close>
+>(({ ...props }, ref) => (
+  <DrawerPrimitive.Close ref={ref} {...props} />
+))
+DrawerClose.displayName = "DrawerClose"
 
 const DrawerOverlay = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Overlay>,
