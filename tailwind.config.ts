@@ -10,6 +10,10 @@ export default {
 	],
 	prefix: "",
 	theme: {
+		// Add emoji-safe font fallback for flags
+		fontFamily: {
+			sans: ['Inter', 'system-ui', 'Segoe UI Emoji', 'Noto Color Emoji', 'sans-serif'],
+		},
 		container: {
 			center: true,
 			padding: '2rem',
