@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { PasswordInput } from './PasswordInput';
+import { PasswordStrength } from './PasswordStrength';
+import { CountrySelect } from './CountrySelect';
 import {
   Form,
   FormControl,
@@ -28,17 +30,21 @@ export const RegisterForm = () => {
       firstName: '',
       lastName: '',
       email: '',
+      countryCode: '',
       phoneNumber: '',
+      country: '',
       password: '',
       confirmPassword: ''
     }
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
+    const fullPhoneNumber = `+${data.countryCode}${data.phoneNumber}`;
     const { error } = await signUp(data.email, data.password, {
       first_name: data.firstName,
       last_name: data.lastName,
-      phone_number: data.phoneNumber
+      phone_number: fullPhoneNumber,
+      country: data.country
     });
     
     if (error) {
@@ -115,29 +121,41 @@ export const RegisterForm = () => {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="phoneNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone Number</FormLabel>
-              <FormControl>
-                <Input 
-                  type="tel" 
-                  placeholder="+12345678901"
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        <div className="grid grid-cols-2 gap-4">
+          <CountrySelect
+            form={form}
+            name="countryCode"
+            label="Country Code"
+          />
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone Number</FormLabel>
+                <FormControl>
+                  <Input type="tel" placeholder="Phone number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <CountrySelect
+          form={form}
+          name="country"
+          label="Country"
         />
 
-        <PasswordInput 
-          form={form} 
-          name="password" 
-          label="Password" 
-        />
+        <div className="space-y-4">
+          <PasswordInput 
+            form={form} 
+            name="password" 
+            label="Password" 
+          />
+          <PasswordStrength password={form.watch('password')} />
+        </div>
 
         <PasswordInput 
           form={form} 
