@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { User } from 'lucide-react';
 
 const ProfileSetup = () => {
   const [firstName, setFirstName] = useState('');
@@ -14,6 +16,7 @@ const ProfileSetup = () => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleProfileSetup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,12 +72,15 @@ const ProfileSetup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-8">
+      <div className="bg-white p-6 md:p-8 rounded-xl shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Complete Your Profile</h2>
-        <form onSubmit={handleProfileSetup} className="space-y-4">
+        <form onSubmit={handleProfileSetup} className="space-y-5">
           <div>
-            <Label htmlFor="firstName">First Name</Label>
+            <div className="flex items-center gap-2 mb-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="firstName" className="text-base">First Name</Label>
+            </div>
             <Input 
               type="text" 
               id="firstName"
@@ -82,10 +88,16 @@ const ProfileSetup = () => {
               onChange={(e) => setFirstName(e.target.value)}
               required 
               placeholder="Enter your first name"
+              className="p-3 h-12 text-base"
+              autoComplete="given-name"
             />
           </div>
+          
           <div>
-            <Label htmlFor="lastName">Last Name</Label>
+            <div className="flex items-center gap-2 mb-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="lastName" className="text-base">Last Name</Label>
+            </div>
             <Input 
               type="text" 
               id="lastName"
@@ -93,11 +105,14 @@ const ProfileSetup = () => {
               onChange={(e) => setLastName(e.target.value)}
               required 
               placeholder="Enter your last name"
+              className="p-3 h-12 text-base"
+              autoComplete="family-name"
             />
           </div>
+          
           <Button 
             type="submit" 
-            className="w-full"
+            className="w-full p-6 text-base mt-6"
             disabled={loading}
           >
             {loading ? 'Saving Profile...' : 'Complete Profile'}
