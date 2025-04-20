@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { User, Home, Settings, LogOut } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -35,18 +36,30 @@ const Dashboard = () => {
         <div className="flex flex-col gap-4">
           <header className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h1 className="text-xl font-semibold">
-                  {profile?.first_name || profile?.email?.split('@')[0] || 'User'}
-                </h1>
-                <p className="text-sm text-muted-foreground truncate max-w-[200px]">{profile?.email}</p>
-              </div>
+              {loading ? (
+                <>
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div>
+                    <Skeleton className="h-6 w-32 mb-1" />
+                    <Skeleton className="h-4 w-40" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h1 className="text-xl font-semibold">
+                      {profile?.first_name || profile?.email?.split('@')[0] || 'User'}
+                    </h1>
+                    <p className="text-sm text-muted-foreground truncate max-w-[200px]">{profile?.email}</p>
+                  </div>
+                </>
+              )}
             </div>
             <Button 
               variant="outline" 
