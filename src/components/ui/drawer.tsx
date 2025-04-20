@@ -15,7 +15,7 @@ const Drawer = ({
 )
 Drawer.displayName = "Drawer"
 
-// Properly typed components to prevent TypeScript errors
+// Explicitly typed components with proper type annotation to prevent the TS error
 const DrawerTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Trigger>
