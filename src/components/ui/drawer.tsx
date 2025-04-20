@@ -15,9 +15,8 @@ const Drawer = ({
 )
 Drawer.displayName = "Drawer"
 
-// Explicitly typed components with proper type annotation to prevent the TS error
 const DrawerTrigger = React.forwardRef<
-  HTMLButtonElement,
+  React.ElementRef<typeof DrawerPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Trigger>
 >(({ ...props }, ref) => (
   <DrawerPrimitive.Trigger ref={ref} {...props} />
@@ -32,7 +31,7 @@ const DrawerPortal = ({
 DrawerPortal.displayName = "DrawerPortal"
 
 const DrawerClose = React.forwardRef<
-  HTMLButtonElement,
+  React.ElementRef<typeof DrawerPrimitive.Close>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Close>
 >(({ ...props }, ref) => (
   <DrawerPrimitive.Close ref={ref} {...props} />
@@ -40,7 +39,7 @@ const DrawerClose = React.forwardRef<
 DrawerClose.displayName = "DrawerClose"
 
 const DrawerOverlay = React.forwardRef<
-  HTMLDivElement,
+  React.ElementRef<typeof DrawerPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
@@ -49,10 +48,10 @@ const DrawerOverlay = React.forwardRef<
     {...props}
   />
 ))
-DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
+DrawerOverlay.displayName = "DrawerOverlay"
 
 const DrawerContent = React.forwardRef<
-  HTMLDivElement,
+  React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
 >(({ className, children, ...props }, ref) => (
   <DrawerPortal>
@@ -95,7 +94,7 @@ const DrawerFooter = ({
 DrawerFooter.displayName = "DrawerFooter"
 
 const DrawerTitle = React.forwardRef<
-  HTMLHeadingElement,
+  React.ElementRef<typeof DrawerPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Title
@@ -107,10 +106,10 @@ const DrawerTitle = React.forwardRef<
     {...props}
   />
 ))
-DrawerTitle.displayName = DrawerPrimitive.Title.displayName
+DrawerTitle.displayName = "DrawerTitle"
 
 const DrawerDescription = React.forwardRef<
-  HTMLParagraphElement,
+  React.ElementRef<typeof DrawerPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Description
@@ -119,7 +118,7 @@ const DrawerDescription = React.forwardRef<
     {...props}
   />
 ))
-DrawerDescription.displayName = DrawerPrimitive.Description.displayName
+DrawerDescription.displayName = "DrawerDescription"
 
 export {
   Drawer,
