@@ -1,8 +1,11 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthRoute } from "./components/auth/AuthRoute";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Auth/Login";
@@ -12,9 +15,8 @@ import ResetPassword from "./pages/Auth/ResetPassword";
 import ProfileSetup from "./pages/Auth/ProfileSetup";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import { useAuth } from "./hooks/useAuth";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import Unauthorized from "./pages/Unauthorized";
+import RolesAndPermissions from "./pages/Admin/RolesAndPermissions";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +69,14 @@ const App = () => (
             element={
               <ProtectedRoute requiredPermission="profile:edit">
                 <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/roles-and-permissions" 
+            element={
+              <ProtectedRoute requiredPermission="roles:manage">
+                <RolesAndPermissions />
               </ProtectedRoute>
             } 
           />
