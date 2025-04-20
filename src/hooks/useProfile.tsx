@@ -26,14 +26,39 @@ export function useProfile(userId?: string) {
 
   const fetchProfile = async (id: string) => {
     try {
+      // Use maybeSingle instead of single to handle case when no profile exists
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      setProfile(data);
+      
+      if (data) {
+        setProfile(data);
+      } else {
+        // If no profile exists, create one with minimal data
+        console.log('No profile found, creating a new one...');
+        const { data: userData, error: authError } = await supabase.auth.getUser();
+        
+        if (authError) throw authError;
+        
+        const newProfile: Partial<Profile> = {
+          id,
+          email: userData.user?.email || null,
+        };
+        
+        const { data: createdProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert(newProfile)
+          .select()
+          .single();
+          
+        if (createError) throw createError;
+        
+        setProfile(createdProfile);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast({
