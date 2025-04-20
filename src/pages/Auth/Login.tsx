@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,12 +8,13 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { Mail, Key, Eye, EyeOff } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, loading } = useAuth();
+  const { signIn, signInWithGoogle, loading } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
