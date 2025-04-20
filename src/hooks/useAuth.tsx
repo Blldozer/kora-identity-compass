@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
@@ -69,6 +70,10 @@ export const useAuth = () => {
   const signUp = async (email: string, password: string, metadata?: object) => {
     setLoading(true);
     try {
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -77,7 +82,22 @@ export const useAuth = () => {
           emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       });
-      return { data, error };
+
+      if (error) {
+        if (error.message.includes('unique constraint')) {
+          throw new Error('This user already exists. Please try logging in instead.');
+        }
+        throw error;
+      }
+
+      return { data, error: null };
+    } catch (error: any) {
+      return { 
+        data: null, 
+        error: { 
+          message: error.message || 'An error occurred during registration' 
+        }
+      };
     } finally {
       setLoading(false);
     }
