@@ -10,8 +10,12 @@ const Index = () => {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-b from-[#F26419]/10 to-[#0A2463]/5">
       <div className="max-w-md mx-auto px-4 py-12">
+        <h1 className="text-2xl font-semibold text-center text-[#0A2463] mb-8">
+          Welcome to Kora
+        </h1>
+        
         <StatsCarousel />
         
         <div className="space-y-4">
