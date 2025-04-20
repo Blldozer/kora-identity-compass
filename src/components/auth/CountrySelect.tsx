@@ -7,6 +7,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { countries } from '@/lib/countries';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { UseFormReturn } from 'react-hook-form';
@@ -48,18 +56,29 @@ export const CountrySelect = ({ form, name, label }: CountrySelectProps) => {
                 )}
               </SelectTrigger>
               <SelectContent>
-                {countries.map((country) => (
-                  <SelectItem key={country.code} value={country.code}>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{country.flag}</span>
-                      <span>
-                        {name === 'countryCode'
-                          ? `+${country.phone}`
-                          : country.name}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
+                <Command>
+                  <CommandInput placeholder="Search countries..." />
+                  <CommandList>
+                    <CommandEmpty>No countries found.</CommandEmpty>
+                    <CommandGroup>
+                      {countries.map((country) => (
+                        <CommandItem
+                          key={country.code}
+                          value={country.code}
+                          onSelect={() => field.onChange(country.code)}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <span className="text-lg">{country.flag}</span>
+                          <span>
+                            {name === 'countryCode'
+                              ? `+${country.phone}`
+                              : country.name}
+                          </span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
               </SelectContent>
             </Select>
           </FormControl>
