@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Env files
+.env
+# Supabase MCP server global config
+%APPDATA%/supabase-mcp/.env

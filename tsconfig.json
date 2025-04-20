@@ -1,5 +1,5 @@
 {
-  "files": [],
+  "files": ["types/vite-env.d.ts"],
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
@@ -14,6 +14,8 @@
     "skipLibCheck": true,
     "allowJs": true,
     "noUnusedLocals": false,
-    "strictNullChecks": false
-  }
+    "strictNullChecks": false,
+    "typeRoots": ["node_modules/@types", "types"]
+  },
+  "include": ["types/vite-env.d.ts"]
 }
