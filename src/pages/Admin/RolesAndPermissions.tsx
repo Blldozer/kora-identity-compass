@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Table,
@@ -13,11 +13,17 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Plus, Edit, Trash2 } from 'lucide-react';
+import { Shield, Trash2 } from 'lucide-react';
+import { AddRoleDialog } from '@/components/admin/AddRoleDialog';
+import { AddPermissionDialog } from '@/components/admin/AddPermissionDialog';
+import { EditRoleDialog } from '@/components/admin/EditRoleDialog';
+import { EditPermissionDialog } from '@/components/admin/EditPermissionDialog';
 
 const RolesAndPermissions = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
+  // Role and Permission Queries
   const { data: roles, isLoading: rolesLoading } = useQuery({
     queryKey: ['roles'],
     queryFn: async () => {
@@ -42,6 +48,57 @@ const RolesAndPermissions = () => {
     }
   });
 
+  // Delete Mutations
+  const deleteRole = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('roles')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
+      toast({
+        title: 'Success',
+        description: 'Role deleted successfully',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete role: ' + error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const deletePermission = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('permissions')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['permissions'] });
+      toast({
+        title: 'Success',
+        description: 'Permission deleted successfully',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete permission: ' + error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
   if (rolesLoading || permissionsLoading) {
     return <div className="flex justify-center p-8">Loading...</div>;
   }
@@ -60,10 +117,7 @@ const RolesAndPermissions = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle>Roles</CardTitle>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Role
-            </Button>
+            <AddRoleDialog />
           </CardHeader>
           <CardContent>
             <Table>
@@ -81,10 +135,12 @@ const RolesAndPermissions = () => {
                     <TableCell>{role.description}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
+                        <EditRoleDialog role={role} />
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => deleteRole.mutate(role.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -100,10 +156,7 @@ const RolesAndPermissions = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle>Permissions</CardTitle>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Permission
-            </Button>
+            <AddPermissionDialog />
           </CardHeader>
           <CardContent>
             <Table>
@@ -121,10 +174,12 @@ const RolesAndPermissions = () => {
                     <TableCell>{permission.description}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
+                        <EditPermissionDialog permission={permission} />
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => deletePermission.mutate(permission.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
