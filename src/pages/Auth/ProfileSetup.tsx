@@ -33,7 +33,7 @@ const ProfileSetup = () => {
     setLoading(true);
     
     try {
-      // Update user metadata in Supabase
+      // Update user metadata in Supabase Auth
       const { error: updateError } = await supabase.auth.updateUser({
         data: { 
           first_name: firstName, 
@@ -43,14 +43,14 @@ const ProfileSetup = () => {
 
       if (updateError) throw updateError;
 
-      // Insert profile data
+      // Update profile data
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
+        .update({
           first_name: firstName,
           last_name: lastName
-        });
+        })
+        .eq('id', user.id);
 
       if (profileError) throw profileError;
 
