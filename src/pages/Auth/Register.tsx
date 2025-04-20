@@ -24,8 +24,48 @@ const Register = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<string>('');
   const { signUp, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Check password strength
+  const checkPasswordStrength = (value: string) => {
+    if (!value) {
+      setPasswordStrength('');
+      return;
+    }
+
+    let strength = 0;
+    
+    // Length check
+    if (value.length >= 8) strength += 1;
+    
+    // Contains uppercase
+    if (/[A-Z]/.test(value)) strength += 1;
+    
+    // Contains lowercase
+    if (/[a-z]/.test(value)) strength += 1;
+    
+    // Contains number
+    if (/[0-9]/.test(value)) strength += 1;
+    
+    // Contains special character
+    if (/[^A-Za-z0-9]/.test(value)) strength += 1;
+
+    if (strength <= 2) {
+      setPasswordStrength('weak');
+    } else if (strength <= 4) {
+      setPasswordStrength('medium');
+    } else {
+      setPasswordStrength('strong');
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    checkPasswordStrength(value);
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +79,15 @@ const Register = () => {
       return;
     }
 
+    if (passwordStrength === 'weak') {
+      toast({
+        title: "Warning",
+        description: "Your password is weak. Consider using a stronger password.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const { error } = await signUp(email, password, {
       first_name: firstName,
       last_name: lastName,
@@ -46,11 +95,26 @@ const Register = () => {
     });
     
     if (error) {
-      toast({
-        title: "Registration Error",
-        description: error.message,
-        variant: "destructive"
-      });
+      // Handle specific error cases
+      if (error.message.includes('User already registered')) {
+        toast({
+          title: "Registration Error",
+          description: "This email is already registered. Please use a different email or try logging in.",
+          variant: "destructive"
+        });
+      } else if (error.message.includes('phone')) {
+        toast({
+          title: "Registration Error",
+          description: "This phone number is already in use. Please use a different phone number.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Registration Error",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
       return;
     }
 
@@ -59,6 +123,13 @@ const Register = () => {
       description: "Please check your email to confirm your account"
     });
     navigate('/login');
+  };
+
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength === 'weak') return 'text-red-500';
+    if (passwordStrength === 'medium') return 'text-yellow-500';
+    if (passwordStrength === 'strong') return 'text-green-500';
+    return '';
   };
 
   return (
@@ -118,7 +189,7 @@ const Register = () => {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   required 
                   minLength={8}
                 />
@@ -132,6 +203,17 @@ const Register = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
+              {passwordStrength && (
+                <div className="mt-1">
+                  <span className={`text-sm font-medium ${getPasswordStrengthColor()}`}>
+                    Password strength: {passwordStrength}
+                  </span>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Strong passwords include: 8+ characters, uppercase & lowercase letters, 
+                    numbers, and special characters
+                  </div>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
