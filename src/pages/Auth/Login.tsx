@@ -1,25 +1,69 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { Mail, Key, Eye, EyeOff } from 'lucide-react';
+import { Mail, Key, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, signInWithGoogle, loading } = useAuth();
+  const { signIn, signInWithGoogle, loading, isLocked } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  
+  // Track remaining lockout time
+  const [lockoutRemaining, setLockoutRemaining] = useState<number | null>(null);
+
+  useEffect(() => {
+    // If account is locked, calculate and display remaining time
+    if (isLocked) {
+      const lockData = localStorage.getItem('kora-auth-lock');
+      if (lockData) {
+        try {
+          const { timestamp } = JSON.parse(atob(lockData));
+          const updateTimer = () => {
+            const elapsed = Date.now() - timestamp;
+            const lockoutDuration = 15 * 60 * 1000; // 15 minutes
+            const remaining = Math.max(0, lockoutDuration - elapsed);
+            
+            if (remaining <= 0) {
+              setLockoutRemaining(null);
+              window.location.reload();
+              return;
+            }
+            
+            setLockoutRemaining(Math.ceil(remaining / 60000)); // Convert to minutes
+          };
+          
+          updateTimer();
+          const interval = setInterval(updateTimer, 60000); // Update every minute
+          return () => clearInterval(interval);
+        } catch (e) {
+          console.error('Error parsing lockout data:', e);
+        }
+      }
+    }
+  }, [isLocked]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email.trim() || !password) {
+      toast({
+        title: "Login Error",
+        description: "Please enter both email and password",
+        variant: "destructive"
+      });
+      return;
+    }
     
     const { data, error } = await signIn(email, password);
     
@@ -32,7 +76,7 @@ const Login = () => {
       return;
     }
 
-    if (data.user) {
+    if (data?.user) {
       toast({
         title: "Login Successful",
         description: "Welcome back!"
@@ -57,6 +101,19 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Login to Kora</h2>
+        
+        {isLocked && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Account temporarily locked due to multiple failed login attempts. 
+              {lockoutRemaining !== null && (
+                <span> Please try again in {lockoutRemaining} {lockoutRemaining === 1 ? 'minute' : 'minutes'}.</span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <Label htmlFor="email" className="text-base">Email</Label>
@@ -71,6 +128,8 @@ const Login = () => {
                 required 
                 placeholder="Enter your email"
                 inputMode={isMobile ? "email" : undefined}
+                disabled={isLocked || loading}
+                autoComplete="username"
               />
             </div>
           </div>
@@ -84,6 +143,7 @@ const Login = () => {
                   e.preventDefault();
                   navigate('/auth/forgot-password');
                 }}
+                disabled={isLocked}
               >
                 Forgot Password?
               </Button>
@@ -98,11 +158,14 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required 
                 placeholder="Enter your password"
+                disabled={isLocked || loading}
+                autoComplete="current-password"
               />
               <button
                 type="button"
                 className="absolute right-3 top-3.5 text-muted-foreground"
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={isLocked}
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -111,9 +174,9 @@ const Login = () => {
           <Button 
             type="submit" 
             className="w-full p-6 text-base"
-            disabled={loading}
+            disabled={loading || isLocked}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Logging in...' : isLocked ? 'Account Locked' : 'Login'}
           </Button>
         </form>
 
@@ -129,7 +192,7 @@ const Login = () => {
           variant="outline"
           className="w-full h-12 space-x-2"
           onClick={handleGoogleLogin}
-          disabled={loading}
+          disabled={loading || isLocked}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -159,6 +222,7 @@ const Login = () => {
               variant="link" 
               onClick={() => navigate('/register')}
               className="text-base"
+              disabled={isLocked}
             >
               Register
             </Button>
