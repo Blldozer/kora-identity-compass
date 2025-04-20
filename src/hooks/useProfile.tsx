@@ -1,8 +1,19 @@
 
 import { useEffect, useState } from 'react';
-import type { Profile } from '@/integrations/supabase/types';
-import { uploadAvatar } from '@/utils/avatar';
 import { fetchProfileById, updateProfileData } from '@/utils/profile';
+import { uploadAvatar } from '@/utils/avatar';
+
+// Define the Profile type directly in this file since it's not exported from integrations/supabase/types
+export interface Profile {
+  id: string;
+  created_at?: string | null;
+  updated_at?: string | null;
+  email?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  avatar_url?: string | null;
+}
 
 export function useProfile(userId?: string) {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -47,5 +58,3 @@ export function useProfile(userId?: string) {
     refreshProfile: () => userId && fetchProfile(userId)
   };
 }
-
-export type { Profile };
