@@ -3,7 +3,6 @@ import React from 'react';
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -32,6 +31,36 @@ export const CountrySelect = ({ form, name, label }: CountrySelectProps) => {
     (country) => country.code === form.watch(name)
   );
 
+  // Placeholder rendering for better UX, with flag for countryCode picker
+  const renderPlaceholder = () => {
+    if (name === 'countryCode') {
+      return (
+        <span className="flex items-center gap-2 text-muted-foreground">
+          <span className="text-lg">🏳️</span>
+          <span>Select country code</span>
+        </span>
+      );
+    }
+    return <span>Select country</span>;
+  };
+
+  // Handle different display for trigger value
+  const renderTriggerValue = () => {
+    if (!selectedCountry) {
+      return renderPlaceholder();
+    }
+    return (
+      <span className="flex items-center gap-2">
+        <span className="text-lg">{selectedCountry.flag}</span>
+        <span>
+          {name === 'countryCode'
+            ? `+${selectedCountry.phone} ${selectedCountry.name}`
+            : selectedCountry.name}
+        </span>
+      </span>
+    );
+  };
+
   return (
     <FormField
       control={form.control}
@@ -42,18 +71,7 @@ export const CountrySelect = ({ form, name, label }: CountrySelectProps) => {
           <FormControl>
             <Select onValueChange={field.onChange} defaultValue={field.value}>
               <SelectTrigger className="w-full">
-                {selectedCountry ? (
-                  <span className="flex items-center gap-2">
-                    <span className="text-lg">{selectedCountry.flag}</span>
-                    <span>
-                      {name === 'countryCode'
-                        ? `+${selectedCountry.phone}`
-                        : selectedCountry.name}
-                    </span>
-                  </span>
-                ) : (
-                  <SelectValue placeholder="Select country" />
-                )}
+                {renderTriggerValue()}
               </SelectTrigger>
               <SelectContent>
                 <Command>
@@ -66,12 +84,12 @@ export const CountrySelect = ({ form, name, label }: CountrySelectProps) => {
                           key={country.code}
                           value={country.code}
                           onSelect={() => field.onChange(country.code)}
-                          className="flex items-center gap-2 cursor-pointer"
+                          className="flex items-center gap-2 cursor-pointer transition-colors hover:bg-accent"
                         >
                           <span className="text-lg">{country.flag}</span>
                           <span>
                             {name === 'countryCode'
-                              ? `+${country.phone}`
+                              ? `+${country.phone} ${country.name}`
                               : country.name}
                           </span>
                         </CommandItem>
@@ -88,3 +106,4 @@ export const CountrySelect = ({ form, name, label }: CountrySelectProps) => {
     />
   );
 };
+
