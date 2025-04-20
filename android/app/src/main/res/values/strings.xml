@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">kora-identity-compass</string>
+    <string name="title_activity_main">kora-identity-compass</string>
+    <string name="package_name">app.lovable.ddaeaf50afc34acbb36178ccfca7baf8</string>
+    <string name="custom_url_scheme">app.lovable.ddaeaf50afc34acbb36178ccfca7baf8</string>
+</resources>
