@@ -53,6 +53,11 @@ export const RegisterForm = () => {
           type: 'manual',
           message: 'This email is already registered. Please try logging in instead.'
         });
+      } else if (error.message.includes('Phone number is already registered')) {
+        form.setError('phoneNumber', {
+          type: 'manual',
+          message: 'This phone number is already registered.'
+        });
       } else if (error.message.includes('phone')) {
         form.setError('phoneNumber', {
           type: 'manual',
@@ -70,7 +75,7 @@ export const RegisterForm = () => {
 
     toast({
       title: "Registration Successful",
-      description: "Please check your email to confirm your account"
+      description: "Please log in with your credentials"
     });
     navigate('/login');
   };
