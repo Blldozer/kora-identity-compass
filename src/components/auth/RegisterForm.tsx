@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
+import { Check, X } from 'lucide-react';
 import { PasswordInput } from './PasswordInput';
 import { PasswordStrength } from './PasswordStrength';
 import { CountrySelect } from './CountrySelect';
@@ -159,6 +160,15 @@ export const RegisterForm = () => {
                   {isChecking && (
                     <div className="absolute right-2 top-1/2 -translate-y-1/2">
                       <span className="animate-spin">⌛</span>
+                    </div>
+                  )}
+                  {!isChecking && field.value && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                      {emailExists ? (
+                        <X className="text-red-500 size-5" />
+                      ) : (
+                        <Check className="text-green-500 size-5" />
+                      )}
                     </div>
                   )}
                 </div>
