@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { PasswordInput } from './PasswordInput';
 import { PasswordStrength } from './PasswordStrength';
 import { CountrySelect } from './CountrySelect';
+import { useRegistrationValidation } from '@/hooks/useRegistrationValidation';
 import {
   Form,
   FormControl,
@@ -23,6 +23,7 @@ import { toast } from '@/hooks/use-toast';
 export const RegisterForm = () => {
   const { signUp, loading } = useAuth();
   const navigate = useNavigate();
+  const { isChecking, emailExists, phoneExists, validateField } = useRegistrationValidation();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
@@ -37,6 +38,36 @@ export const RegisterForm = () => {
       confirmPassword: ''
     }
   });
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (name === 'email' && value.email) {
+        validateField('email', value.email);
+      }
+      if (name === 'phoneNumber' && value.phoneNumber && value.countryCode) {
+        const fullPhone = `+${value.countryCode}${value.phoneNumber}`;
+        validateField('phone', fullPhone);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form.watch, validateField]);
+
+  useEffect(() => {
+    if (emailExists) {
+      form.setError('email', {
+        type: 'manual',
+        message: 'This email is already registered. Please try logging in instead.'
+      });
+    }
+
+    if (phoneExists) {
+      form.setError('phoneNumber', {
+        type: 'manual',
+        message: 'This phone number is already registered.'
+      });
+    }
+  }, [emailExists, phoneExists, form.setError]);
 
   const onSubmit = async (data: RegisterFormValues) => {
     const fullPhoneNumber = `+${data.countryCode}${data.phoneNumber}`;
@@ -119,7 +150,18 @@ export const RegisterForm = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" {...field} />
+                <div className="relative">
+                  <Input 
+                    type="email" 
+                    {...field} 
+                    className={isChecking ? 'pr-8' : ''} 
+                  />
+                  {isChecking && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                      <span className="animate-spin">⌛</span>
+                    </div>
+                  )}
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
