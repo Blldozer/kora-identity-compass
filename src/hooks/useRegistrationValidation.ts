@@ -17,12 +17,16 @@ export function useRegistrationValidation() {
   });
 
   const checkEmailExists = async (email: string) => {
-    const { data, error } = await supabase.auth.admin.listUsers({
-      filters: {
-        email: email
-      }
+    const { data, error } = await supabase.functions.invoke('check-email', {
+      body: { email }
     });
-    return data && data.length > 0;
+
+    if (error) {
+      console.error('Error checking email:', error);
+      return false;
+    }
+
+    return data?.exists ?? false;
   };
 
   const checkPhoneExists = async (phone: string) => {
