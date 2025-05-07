@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Unauthorized from "./pages/Unauthorized";
 import RolesAndPermissions from "./pages/Admin/RolesAndPermissions";
+import Callback from "./pages/Auth/Callback";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             </AuthRoute>
           } />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
+          <Route path="/auth/callback" element={<Callback />} />
           
           {/* Protected Routes */}
           <Route 
