@@ -31,21 +31,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           
           {/* Auth Routes */}
-          <Route path="/login" element={
-            <AuthRoute>
-              <Login />
-            </AuthRoute>
-          } />
-          <Route path="/register" element={
-            <AuthRoute>
-              <Register />
-            </AuthRoute>
-          } />
-          <Route path="/auth/forgot-password" element={
-            <AuthRoute>
-              <ForgotPassword />
-            </AuthRoute>
-          } />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/auth/callback" element={<Callback />} />
           

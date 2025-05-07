@@ -8,8 +8,19 @@ interface AuthRouteProps {
 }
 
 export const AuthRoute = ({ children }: AuthRouteProps) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-2 w-24 bg-gradient-to-r from-orange-500 to-blue-600 rounded mb-3"></div>
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (user) {
     return <Navigate to="/dashboard" state={{ from: location }} replace />;
