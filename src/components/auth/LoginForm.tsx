@@ -73,12 +73,12 @@ export const LoginForm = () => {
         <Label htmlFor="email" className="text-base">Email</Label>
         <div className="relative flex items-center">
           <div className="absolute left-3 pointer-events-none">
-            <Mail className="h-5 w-5 text-muted-foreground" />
+            <Mail className="h-4 w-4 text-muted-foreground" />
           </div>
           <Input 
             type="email" 
             id="email"
-            className="pl-10 p-3 text-base h-12"
+            className="pl-12 p-3 text-base h-12"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required 
