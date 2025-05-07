@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthLockout } from './useAuthLockout';
 import { useAuthSession } from './useAuthSession';
@@ -30,25 +30,45 @@ export const useAuth = () => {
   const { signInWithGoogle } = useGoogleAuth();
   const { resetPassword, updatePassword } = usePasswordAuth();
 
+  const refreshSession = useCallback(async () => {
+    try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      console.log("Refreshing session:", currentSession ? "Session exists" : "No session");
+      updateSession(currentSession);
+      return currentSession;
+    } catch (error) {
+      console.error("Error refreshing session:", error);
+      return null;
+    }
+  }, [updateSession]);
+
   useEffect(() => {
+    // Check account lockout status
     checkAccountLock();
     
+    // Setup auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log("Auth state changed:", event);
         updateSession(session);
         
         if (event === 'SIGNED_IN') {
           resetFailedAttempts();
+        } else if (event === 'SIGNED_OUT') {
+          // Clear any cached session data
+          clearSecureStorage();
         }
       }
     );
 
-    checkCachedSession();
+    // Initial session check
+    refreshSession();
 
+    // Clean up listener
     return () => {
       subscription.unsubscribe();
     };
-  }, [checkAccountLock, resetFailedAttempts, updateSession, checkCachedSession]);
+  }, [checkAccountLock, resetFailedAttempts, updateSession, refreshSession]);
 
   const signIn = async (email: string, password: string): Promise<AuthResult> => {
     if (checkAccountLock()) {
@@ -63,12 +83,14 @@ export const useAuth = () => {
 
     setLoading(true);
     try {
+      console.log("Attempting sign in with:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
       
       if (error) {
+        console.error("Sign in error:", error);
         recordFailedAttempt();
         return { 
           data: null, 
@@ -79,6 +101,8 @@ export const useAuth = () => {
         };
       }
       
+      console.log("Sign in successful:", data.user?.id);
+      
       // Check if profile exists and create one if it doesn't
       if (data.user) {
         const { data: profileData, error: profileError } = await supabase
@@ -88,6 +112,7 @@ export const useAuth = () => {
           .maybeSingle();
         
         if (!profileData && !profileError) {
+          console.log("Creating missing profile for user:", data.user.id);
           // Create a profile for the user if it doesn't exist
           const { error: insertError } = await supabase
             .from('profiles')
@@ -108,6 +133,7 @@ export const useAuth = () => {
       resetFailedAttempts();
       return { data, error: null };
     } catch (error: any) {
+      console.error("Unexpected sign in error:", error);
       return {
         data: null,
         error: {
@@ -123,12 +149,14 @@ export const useAuth = () => {
   const signOut = async (): Promise<AuthResult> => {
     setLoading(true);
     try {
+      console.log("Signing out...");
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
       clearSecureStorage();
       return { data: true, error: null };
     } catch (error: any) {
+      console.error("Sign out error:", error);
       return {
         data: null,
         error: {
@@ -152,5 +180,6 @@ export const useAuth = () => {
     signInWithGoogle,
     resetPassword,
     updatePassword,
+    refreshSession
   };
 };

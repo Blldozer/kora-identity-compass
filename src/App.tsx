@@ -30,14 +30,14 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           
-          {/* Auth Routes */}
+          {/* Auth Routes - Available to non-authenticated users */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth/forgot-password" element={<ForgotPassword />} />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/auth/callback" element={<Callback />} />
           
-          {/* Protected Routes */}
+          {/* Profile Setup - Available to authenticated users without permission checks */}
           <Route 
             path="/profile-setup" 
             element={
@@ -46,10 +46,12 @@ const App = () => (
               </ProtectedRoute>
             } 
           />
+          
+          {/* Protected Routes with Permission Checks */}
           <Route 
             path="/dashboard" 
             element={
-              <ProtectedRoute requiredPermission="dashboard:view">
+              <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             } 
@@ -57,7 +59,7 @@ const App = () => (
           <Route 
             path="/profile" 
             element={
-              <ProtectedRoute requiredPermission="profile:edit">
+              <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
             } 

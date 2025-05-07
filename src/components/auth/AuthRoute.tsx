@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -22,9 +21,11 @@ export const AuthRoute = ({ children }: AuthRouteProps) => {
     );
   }
 
+  // If user is authenticated, redirect to dashboard
   if (user) {
     return <Navigate to="/dashboard" state={{ from: location }} replace />;
   }
 
+  // Otherwise, render the children (login/register pages)
   return <>{children}</>;
 };

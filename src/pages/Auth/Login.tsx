@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,8 +18,10 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const { signIn, signInWithGoogle, loading, isLocked } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const [lockoutRemaining, setLockoutRemaining] = useState<number | null>(null);
+  const [loginAttempts, setLoginAttempts] = useState(0);
 
   useEffect(() => {
     if (isLocked) {
@@ -75,9 +77,13 @@ const Login = () => {
       return;
     }
     
+    setLoginAttempts(prev => prev + 1);
+    console.log(`Login attempt ${loginAttempts + 1} for ${email}`);
+    
     const { data, error } = await signIn(email, password);
     
     if (error) {
+      console.error("Login error:", error);
       // Provide more specific error messages
       let errorMessage = error.message;
       if (error.message.includes("Invalid login credentials")) {
@@ -95,11 +101,15 @@ const Login = () => {
     }
 
     if (data?.user) {
+      console.log("Login successful for user:", data.user.id);
       toast({
         title: "Login Successful",
         description: "Welcome back!"
       });
-      navigate('/dashboard');
+      
+      // Check if we came from somewhere specific
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from);
     }
   };
 
