@@ -20,7 +20,14 @@ export const ProtectedRoute = ({
   const location = useLocation();
 
   if (authLoading || rbacLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-2 w-24 bg-gradient-to-r from-orange-500 to-blue-600 rounded mb-3"></div>
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
@@ -28,11 +35,23 @@ export const ProtectedRoute = ({
   }
 
   if (requiredRole && !hasRole(requiredRole)) {
-    return <Navigate to="/unauthorized" replace />;
+    return (
+      <Navigate 
+        to="/unauthorized" 
+        state={{ requiredPermission: requiredRole, from: location }} 
+        replace 
+      />
+    );
   }
 
   if (requiredPermission && !hasPermission(requiredPermission)) {
-    return <Navigate to="/unauthorized" replace />;
+    return (
+      <Navigate 
+        to="/unauthorized" 
+        state={{ requiredPermission, from: location }} 
+        replace 
+      />
+    );
   }
 
   return <>{children}</>;
