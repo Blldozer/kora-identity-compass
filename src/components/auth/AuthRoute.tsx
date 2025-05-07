@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +11,7 @@ export const AuthRoute = ({ children }: AuthRouteProps) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
+  // Show loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -21,11 +23,17 @@ export const AuthRoute = ({ children }: AuthRouteProps) => {
     );
   }
 
-  // If user is authenticated, redirect to dashboard
+  // If user is authenticated, check if they need to complete profile setup
   if (user) {
-    return <Navigate to="/dashboard" state={{ from: location }} replace />;
+    // In a real app, you'd check if profile is complete
+    // Since we can't easily do that here, we'll redirect to dashboard
+    console.log("User is authenticated, redirecting from auth route");
+    
+    // Get the intended destination if it exists, or use dashboard as default
+    const from = location.state?.from?.pathname || "/dashboard";
+    return <Navigate to={from} replace />;
   }
 
-  // Otherwise, render the children (login/register pages)
+  // User is not authenticated, allow access to auth pages
   return <>{children}</>;
 };

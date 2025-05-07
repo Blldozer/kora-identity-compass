@@ -31,17 +31,48 @@ const App = () => (
           <Route path="/" element={<Index />} />
           
           {/* Auth Routes - Available to non-authenticated users */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-          <Route path="/auth/reset-password" element={<ResetPassword />} />
-          <Route path="/auth/callback" element={<Callback />} />
+          <Route 
+            path="/login" 
+            element={
+              <AuthRoute>
+                <Login />
+              </AuthRoute>
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              <AuthRoute>
+                <Register />
+              </AuthRoute>
+            } 
+          />
+          <Route 
+            path="/auth/forgot-password" 
+            element={
+              <AuthRoute>
+                <ForgotPassword />
+              </AuthRoute>
+            } 
+          />
+          <Route 
+            path="/auth/reset-password" 
+            element={
+              <AuthRoute>
+                <ResetPassword />
+              </AuthRoute>
+            } 
+          />
+          <Route 
+            path="/auth/callback" 
+            element={<Callback />} 
+          />
           
-          {/* Profile Setup - Available to authenticated users without permission checks */}
+          {/* Profile Setup - Available to authenticated users without RBAC checks */}
           <Route 
             path="/profile-setup" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute skipRbacCheck={true}>
                 <ProfileSetup />
               </ProtectedRoute>
             } 

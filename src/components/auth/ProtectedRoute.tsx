@@ -8,18 +8,20 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: string;
   requiredPermission?: string;
+  skipRbacCheck?: boolean;
 }
 
 export const ProtectedRoute = ({ 
   children, 
   requiredRole, 
-  requiredPermission 
+  requiredPermission,
+  skipRbacCheck = false
 }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
   const { hasRole, hasPermission, loading: rbacLoading } = useRBAC();
   const location = useLocation();
 
-  // Show loading state while authentication or permissions are loading
+  // Show loading state while authentication is loading
   if (authLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -37,8 +39,13 @@ export const ProtectedRoute = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Skip RBAC checks if explicitly told to or if no specific permissions/roles are required
+  if (skipRbacCheck || (!requiredRole && !requiredPermission)) {
+    return <>{children}</>;
+  }
+
   // Only check permissions if we're done loading them and if specific permissions/roles are required
-  if (rbacLoading && (requiredRole || requiredPermission)) {
+  if (rbacLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="animate-pulse flex flex-col items-center">

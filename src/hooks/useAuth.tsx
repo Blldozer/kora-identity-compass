@@ -32,8 +32,9 @@ export const useAuth = () => {
 
   const refreshSession = useCallback(async () => {
     try {
+      console.log("Refreshing session manually");
       const { data: { session: currentSession } } = await supabase.auth.getSession();
-      console.log("Refreshing session:", currentSession ? "Session exists" : "No session");
+      console.log("Refreshed session:", currentSession ? "Session exists" : "No session");
       updateSession(currentSession);
       return currentSession;
     } catch (error) {
@@ -46,14 +47,28 @@ export const useAuth = () => {
     // Check account lockout status
     checkAccountLock();
     
+    // Check for cached session immediately to prevent flash of unauthenticated state
+    checkCachedSession().then(() => {
+      console.log("Initial session check complete");
+    });
+
     // Setup auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, newSession) => {
         console.log("Auth state changed:", event);
-        updateSession(session);
+        
+        // Important: this must be synchronous to prevent infinite loops
+        updateSession(newSession);
         
         if (event === 'SIGNED_IN') {
           resetFailedAttempts();
+          
+          // Defer profile check to avoid auth state loops
+          setTimeout(() => {
+            if (newSession?.user) {
+              checkUserProfile(newSession.user.id);
+            }
+          }, 0);
         } else if (event === 'SIGNED_OUT') {
           // Clear any cached session data
           clearSecureStorage();
@@ -61,14 +76,46 @@ export const useAuth = () => {
       }
     );
 
-    // Initial session check
-    refreshSession();
-
     // Clean up listener
     return () => {
       subscription.unsubscribe();
     };
-  }, [checkAccountLock, resetFailedAttempts, updateSession, refreshSession]);
+  }, [checkAccountLock, resetFailedAttempts, updateSession, checkCachedSession]);
+
+  // Check if user has a profile and create one if needed
+  const checkUserProfile = async (userId: string) => {
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      if (!profileData && !profileError) {
+        console.log("Creating missing profile for user:", userId);
+        // Get user details
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData?.user) return;
+        
+        // Create a profile for the user if it doesn't exist
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            email: userData.user.email,
+            first_name: userData.user.user_metadata?.first_name || '',
+            last_name: userData.user.user_metadata?.last_name || '',
+            phone: userData.user.user_metadata?.phone_number || ''
+          });
+          
+        if (insertError) {
+          console.error('Error creating missing profile:', insertError);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking user profile:", error);
+    }
+  };
 
   const signIn = async (email: string, password: string): Promise<AuthResult> => {
     if (checkAccountLock()) {
@@ -102,35 +149,13 @@ export const useAuth = () => {
       }
       
       console.log("Sign in successful:", data.user?.id);
+      resetFailedAttempts();
       
-      // Check if profile exists and create one if it doesn't
+      // Check if profile exists immediately to avoid race conditions
       if (data.user) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', data.user.id)
-          .maybeSingle();
-        
-        if (!profileData && !profileError) {
-          console.log("Creating missing profile for user:", data.user.id);
-          // Create a profile for the user if it doesn't exist
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
-              email: data.user.email,
-              first_name: data.user.user_metadata?.first_name || '',
-              last_name: data.user.user_metadata?.last_name || '',
-              phone: data.user.user_metadata?.phone_number || ''
-            });
-            
-          if (insertError) {
-            console.error('Error creating missing profile:', insertError);
-          }
-        }
+        await checkUserProfile(data.user.id);
       }
       
-      resetFailedAttempts();
       return { data, error: null };
     } catch (error: any) {
       console.error("Unexpected sign in error:", error);

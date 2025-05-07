@@ -41,8 +41,26 @@ export const useAuthSession = () => {
   const checkCachedSession = useCallback(async (): Promise<AuthResult<Session>> => {
     try {
       console.log("Checking cached session");
-      setLoading(true);
       
+      // Always get the latest session from Supabase first
+      console.log("Getting current session from Supabase");
+      const { data: { session: supabaseSession }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("Error getting session from Supabase:", error);
+        throw error;
+      }
+      
+      console.log("Supabase session check:", supabaseSession ? "Session exists" : "No session");
+      
+      // If we have a session from Supabase, use it
+      if (supabaseSession) {
+        updateSession(supabaseSession);
+        setLoading(false);
+        return { data: supabaseSession, error: null };
+      }
+      
+      // If no session from Supabase, try the cached session
       const cachedSession = getSecurely('user-session');
       
       if (cachedSession) {
@@ -56,9 +74,25 @@ export const useAuthSession = () => {
             const now = Date.now();
             
             if (expiresAt > now) {
-              console.log("Cached session is valid");
-              setSession(parsedSession);
-              setUser(parsedSession.user);
+              console.log("Cached session is valid, attempting to refresh");
+              
+              // Session is valid but we couldn't get it from Supabase
+              // This likely means it's stale. Try to refresh the auth manually
+              try {
+                const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
+                if (refreshedSession) {
+                  console.log("Session refreshed successfully");
+                  updateSession(refreshedSession);
+                  setLoading(false);
+                  return { data: refreshedSession, error: null };
+                } else {
+                  console.log("Session refresh failed, clearing cached session");
+                  removeSecurely('user-session');
+                }
+              } catch (refreshError) {
+                console.error("Error refreshing session:", refreshError);
+                removeSecurely('user-session');
+              }
             } else {
               console.log("Cached session is expired");
               removeSecurely('user-session');
@@ -70,16 +104,16 @@ export const useAuthSession = () => {
         }
       }
       
-      // Always get the latest session from Supabase
-      console.log("Getting current session from Supabase");
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      console.log("Supabase session check:", session ? "Session exists" : "No session");
-      updateSession(session);
-      
-      return { data: session, error: null };
+      // At this point, we have no valid session
+      setLoading(false);
+      setSession(null);
+      setUser(null);
+      return { data: null, error: null };
     } catch (error: any) {
       console.error('Error checking session:', error);
+      setLoading(false);
+      setSession(null);
+      setUser(null);
       return {
         data: null,
         error: {
@@ -87,36 +121,8 @@ export const useAuthSession = () => {
           code: error.code
         }
       };
-    } finally {
-      setLoading(false);
     }
   }, [updateSession]);
-
-  // Clear expired session on component mount
-  useEffect(() => {
-    const clearExpiredSession = () => {
-      const cachedSession = getSecurely('user-session');
-      if (cachedSession) {
-        try {
-          const parsedSession = JSON.parse(cachedSession);
-          if (parsedSession.expires_at) {
-            const expiresAt = parsedSession.expires_at * 1000;
-            const now = Date.now();
-            
-            if (expiresAt <= now) {
-              console.log("Removing expired cached session on mount");
-              removeSecurely('user-session');
-            }
-          }
-        } catch (e) {
-          console.error('Error parsing cached session:', e);
-          removeSecurely('user-session');
-        }
-      }
-    };
-    
-    clearExpiredSession();
-  }, []);
 
   return {
     user,
