@@ -34,17 +34,46 @@ export async function fetchProfileById(id: string): Promise<Profile | null> {
 
 export async function createInitialProfile(id: string, email: string | undefined): Promise<Profile | null> {
   try {
+    // First check if profile exists to prevent duplicates
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+      
+    if (existingProfile) {
+      return existingProfile;
+    }
+    
+    // Get user metadata to populate profile
+    const { data: userData } = await supabase.auth.getUser();
+    const metadata = userData?.user?.user_metadata || {};
+    
     const { data: createdProfile, error: createError } = await supabase
       .from('profiles')
       .insert({
         id: id,
-        email: email || null
+        email: email || null,
+        first_name: metadata.first_name || '',
+        last_name: metadata.last_name || '',
+        phone: metadata.phone_number || ''
       })
       .select()
       .single();
       
     if (createError) {
       if (createError.code === '23505') {
+        // Profile already exists (race condition), try to fetch it again
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
+          
+        if (existingProfile) {
+          return existingProfile;
+        }
+        
         toast({
           title: 'Profile Creation Error',
           description: 'A profile with this email already exists.',

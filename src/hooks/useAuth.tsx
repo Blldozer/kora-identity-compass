@@ -79,6 +79,32 @@ export const useAuth = () => {
         };
       }
       
+      // Check if profile exists and create one if it doesn't
+      if (data.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', data.user.id)
+          .maybeSingle();
+        
+        if (!profileData && !profileError) {
+          // Create a profile for the user if it doesn't exist
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              email: data.user.email,
+              first_name: data.user.user_metadata?.first_name || '',
+              last_name: data.user.user_metadata?.last_name || '',
+              phone: data.user.user_metadata?.phone_number || ''
+            });
+            
+          if (insertError) {
+            console.error('Error creating missing profile:', insertError);
+          }
+        }
+      }
+      
       resetFailedAttempts();
       return { data, error: null };
     } catch (error: any) {

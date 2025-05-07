@@ -78,9 +78,17 @@ const Login = () => {
     const { data, error } = await signIn(email, password);
     
     if (error) {
+      // Provide more specific error messages
+      let errorMessage = error.message;
+      if (error.message.includes("Invalid login credentials")) {
+        errorMessage = "Invalid email or password. Please try again.";
+      } else if (error.message.includes("Email not confirmed")) {
+        errorMessage = "Please confirm your email before logging in.";
+      }
+      
       toast({
         title: "Login Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive"
       });
       return;

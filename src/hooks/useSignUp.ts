@@ -17,11 +17,19 @@ export const useSignUp = () => {
         throw new Error('Email and password are required');
       }
 
+      // Ensure metadata has required fields to prevent profile creation issues
+      const safeMetadata = {
+        first_name: '',
+        last_name: '',
+        phone_number: '',
+        ...metadata
+      };
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { 
-          data: metadata,
+          data: safeMetadata,
           emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       });
@@ -31,6 +39,29 @@ export const useSignUp = () => {
           throw new Error('This user already exists. Please try logging in instead.');
         }
         throw error;
+      }
+
+      // Double check that profile was created by the trigger, otherwise create it manually
+      if (data?.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', data.user.id)
+          .maybeSingle();
+          
+        if (!profileData) {
+          // Create profile manually if trigger didn't work
+          await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              email: data.user.email,
+              first_name: safeMetadata.first_name || '',
+              last_name: safeMetadata.last_name || '',
+              phone: safeMetadata.phone_number || ''
+            })
+            .single();
+        }
       }
 
       return { data, error: null };
