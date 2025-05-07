@@ -38,8 +38,10 @@ export const AuthPasswordInput = ({
           </Button>
         )}
       </div>
-      <div className="relative">
-        <Key className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+      <div className="relative flex items-center">
+        <div className="absolute left-3 pointer-events-none">
+          <Key className="h-5 w-5 text-muted-foreground" />
+        </div>
         <Input 
           type={showPassword ? "text" : "password"} 
           id="password"
@@ -53,7 +55,7 @@ export const AuthPasswordInput = ({
         />
         <button
           type="button"
-          className="absolute right-3 top-3.5 text-muted-foreground"
+          className="absolute right-3 text-muted-foreground"
           onClick={() => setShowPassword(!showPassword)}
           disabled={disabled}
         >
