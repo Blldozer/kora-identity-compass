@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { User, Home, Settings, LogOut } from 'lucide-react';
+import { User, Home, Settings, LogOut, CreditCard } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PlaidButton } from '@/components/plaid/PlaidButton';
+import { FinancialOverview } from '@/components/plaid/FinancialOverview';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -75,18 +77,39 @@ const Dashboard = () => {
             <Home className="h-4 w-4" />
             <AlertTitle>Welcome to Kora</AlertTitle>
             <AlertDescription>
-              Your financial dashboard is ready. Complete your profile to get personalized insights.
+              Your financial dashboard is ready. Connect your accounts to get personalized insights.
             </AlertDescription>
           </Alert>
 
-          <div className="grid gap-4">
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Financial Overview</CardTitle>
+                <CardDescription>Connect your accounts to get started</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm">Connect your financial accounts to get a complete picture of your finances.</p>
+                <PlaidButton 
+                  className="w-full justify-center h-12 text-base"
+                />
+                <Button 
+                  className="w-full justify-center h-12 text-base"
+                  variant="outline"
+                  onClick={() => navigate('/finances')}
+                >
+                  <CreditCard className="h-5 w-5 mr-2" />
+                  Manage Finances
+                </Button>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Account Information</CardTitle>
                 <CardDescription>Manage your personal details</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-sm">Your account is active and secure.</p>
+              <CardContent className="space-y-4">
+                <p className="text-sm">Your account is active and secure.</p>
                 <Button 
                   className="w-full justify-center h-12 text-base"
                   onClick={handleEditProfile}
@@ -94,25 +117,20 @@ const Dashboard = () => {
                   <User className="h-5 w-5 mr-2" />
                   View Profile
                 </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Getting Started</CardTitle>
-                <CardDescription>Next steps for your account</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-sm">Complete your profile to get personalized recommendations.</p>
                 <Button 
                   className="w-full justify-center h-12 text-base"
+                  variant="outline"
                   onClick={handleEditProfile}
                 >
                   <Settings className="h-5 w-5 mr-2" />
-                  Complete Profile
+                  Settings
                 </Button>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mt-4">
+            <FinancialOverview />
           </div>
         </div>
       </div>

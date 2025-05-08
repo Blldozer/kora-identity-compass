@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import StatsCarousel from '@/components/landing/StatsCarousel';
+import { PlaidButton } from '@/components/plaid/PlaidButton';
+import { CreditCard } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -20,12 +22,18 @@ const Index = () => {
         
         <div className="space-y-4 mt-8">
           {user ? (
-            <Button 
-              className="w-full h-12 text-lg bg-[#0A2463] hover:bg-[#0A2463]/90"
-              onClick={() => navigate('/dashboard')}
-            >
-              Go to Dashboard
-            </Button>
+            <>
+              <Button 
+                className="w-full h-12 text-lg bg-[#0A2463] hover:bg-[#0A2463]/90"
+                onClick={() => navigate('/dashboard')}
+              >
+                Go to Dashboard
+              </Button>
+              <PlaidButton 
+                className="w-full h-12 text-lg"
+                variant="outline"
+              />
+            </>
           ) : (
             <>
               <Button 
