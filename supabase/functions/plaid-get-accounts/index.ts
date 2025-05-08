@@ -19,6 +19,8 @@ serve(async (req) => {
   try {
     // Get authorization header
     const authHeader = req.headers.get('Authorization');
+    console.log("Auth header present:", authHeader ? "Yes" : "No");
+    
     if (!authHeader) {
       console.error("No authorization header provided");
       return new Response(JSON.stringify({ error: 'No authorization header' }), {
@@ -42,6 +44,10 @@ serve(async (req) => {
         }
       );
     }
+    
+    // Check if we're in development/sandbox mode - useful for debugging
+    const isDevMode = Deno.env.get('PLAID_ENV') === 'sandbox';
+    console.log("Running in environment:", Deno.env.get('PLAID_ENV') || 'unknown');
     
     const supabaseClient = createClient(
       supabaseUrl,
@@ -116,6 +122,65 @@ serve(async (req) => {
         }),
         {
           status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // In development mode with no accounts, provide mock data for testing
+    if (isDevMode && (!accounts || accounts.length === 0)) {
+      console.log("Development mode: Returning mock account data");
+      const mockAccounts = [
+        {
+          id: 'mock-account-1',
+          item_id: 'mock-item-1',
+          user_id: user.id,
+          plaid_account_id: 'mock-plaid-1',
+          name: 'Mock Checking Account',
+          mask: '1234',
+          type: 'depository',
+          subtype: 'checking',
+          balance_available: 1250.45,
+          balance_current: 1290.33,
+          balance_iso_currency_code: 'USD',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          plaid_items: {
+            institution_name: 'Mock Bank',
+            status: 'active',
+            error_message: null
+          }
+        },
+        {
+          id: 'mock-account-2',
+          item_id: 'mock-item-1',
+          user_id: user.id,
+          plaid_account_id: 'mock-plaid-2',
+          name: 'Mock Credit Card',
+          mask: '5678',
+          type: 'credit',
+          subtype: 'credit card',
+          balance_available: 3500.00,
+          balance_current: 450.24,
+          balance_limit: 5000.00,
+          balance_iso_currency_code: 'USD',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          plaid_items: {
+            institution_name: 'Mock Bank',
+            status: 'active',
+            error_message: null
+          }
+        }
+      ];
+      
+      return new Response(
+        JSON.stringify({
+          success: true,
+          accounts: mockAccounts,
+          is_mock_data: true
+        }),
+        {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );

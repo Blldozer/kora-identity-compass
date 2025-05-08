@@ -10,7 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
+import { AlertCircle } from 'lucide-react';
 
 // Type declarations for Plaid Link
 declare global {
@@ -34,11 +36,24 @@ declare global {
 // Load Plaid Link script
 const loadPlaidLinkScript = () => {
   return new Promise<void>((resolve, reject) => {
+    if (window.Plaid) {
+      console.log("Plaid Link already loaded");
+      resolve();
+      return;
+    }
+    
+    console.log("Loading Plaid Link script");
     const script = document.createElement('script');
     script.src = 'https://cdn.plaid.com/link/v2/stable/link-initialize.js';
     script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Plaid Link script'));
+    script.onload = () => {
+      console.log("Plaid Link script loaded successfully");
+      resolve();
+    };
+    script.onerror = (error) => {
+      console.error("Failed to load Plaid Link script:", error);
+      reject(new Error('Failed to load Plaid Link script'));
+    };
     document.body.appendChild(script);
   });
 };
@@ -64,14 +79,19 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
   const [plaidLoaded, setPlaidLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { createLinkToken, exchangePublicToken } = usePlaid();
+  const [scriptError, setScriptError] = useState<string | null>(null);
+  const { createLinkToken, exchangePublicToken, connectionError, isDevelopmentMode } = usePlaid();
+
+  const isDevMode = isDevelopmentMode();
 
   const loadScript = useCallback(async () => {
     try {
+      setScriptError(null);
       await loadPlaidLinkScript();
       setPlaidLoaded(true);
     } catch (error) {
       console.error('Error loading Plaid script:', error);
+      setScriptError('Failed to load Plaid connection script');
       toast({
         title: 'Error',
         description: 'Failed to load Plaid connection. Please try again later.',
@@ -87,18 +107,20 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
   const openPlaidLink = useCallback(async () => {
     setIsLoading(true);
     try {
+      console.log("Requesting link token...");
       const token = await createLinkToken(products);
       if (!token) {
         throw new Error('Failed to create link token');
       }
       
+      console.log("Link token received, initializing Plaid Link");
       setLinkToken(token);
 
       if (plaidLoaded && token) {
         const plaidLinkHandler = window.Plaid.create({
           token,
           onSuccess: async (public_token, metadata) => {
-            console.log('Plaid Link success', metadata);
+            console.log('Plaid Link success, exchanging token...', metadata.institution.name);
             const success = await exchangePublicToken(public_token, metadata.institution);
             if (success && onSuccess) {
               onSuccess();
@@ -106,6 +128,7 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
           },
           onExit: (err, metadata) => {
             console.log('Plaid Link exit', err, metadata);
+            setIsLoading(false);
             if (err) {
               toast({
                 title: 'Connection Interrupted',
@@ -116,6 +139,10 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
           },
           onEvent: (eventName, metadata) => {
             console.log('Plaid Link event', eventName, metadata);
+            // Track specific events for better debugging
+            if (eventName === 'ERROR') {
+              console.error('Plaid Link error event:', metadata);
+            }
           },
           onLoad: () => {
             console.log('Plaid Link loaded');
@@ -153,8 +180,31 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
     }
   }, [isModalOpen, plaidLoaded, openPlaidLink]);
 
+  // If connectionError or scriptError, show an inline alert with error information
+  const hasError = connectionError || scriptError;
+
   return (
     <>
+      {hasError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Connection Error</AlertTitle>
+          <AlertDescription>
+            {connectionError || scriptError}
+            {isDevMode && (
+              <div className="mt-2 text-sm">
+                <p>Sandbox mode is active. Make sure your Plaid credentials are correctly set up in Supabase.</p>
+                <p className="mt-1">In sandbox mode, you can use test credentials like:</p>
+                <ul className="list-disc pl-5 mt-1">
+                  <li>Username: <code>user_good</code></li>
+                  <li>Password: <code>pass_good</code></li>
+                </ul>
+              </div>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <Button
         onClick={handleConnect}
         className={className}
@@ -171,6 +221,17 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
             <DialogTitle>Loading Plaid Connection</DialogTitle>
             <DialogDescription>
               We're preparing to connect to your financial institution. This will only take a moment...
+              {isDevMode && (
+                <div className="mt-4 p-3 bg-muted rounded-md text-sm">
+                  <p className="font-medium">Development Mode Detected</p>
+                  <p className="mt-1">You'll be able to use test credentials to connect sandbox accounts.</p>
+                  <p className="mt-2">Example credentials:</p>
+                  <ul className="list-disc pl-5 mt-1">
+                    <li>Username: <code>user_good</code></li>
+                    <li>Password: <code>pass_good</code></li>
+                  </ul>
+                </div>
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
