@@ -5,41 +5,69 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export const FinancialOverview: React.FC = () => {
   const { loading, accounts, getAccounts } = usePlaid();
   const [totalBalance, setTotalBalance] = useState(0);
   const [accountTypeData, setAccountTypeData] = useState<{ name: string; value: number; color: string }[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   const COLORS = ['#0A2463', '#3E92CC', '#F26419', '#F9C784', '#8AC926', '#FF595E'];
 
   useEffect(() => {
-    getAccounts();
+    const fetchAccounts = async () => {
+      try {
+        setError(null);
+        await getAccounts();
+      } catch (err) {
+        console.error("Error in FinancialOverview component:", err);
+        setError("Unable to load financial data. Please try again later.");
+      } finally {
+        setIsInitialLoad(false);
+      }
+    };
+    
+    fetchAccounts();
+    
+    // Refresh data every 2 minutes if the component is visible
+    const interval = setInterval(fetchAccounts, 120000);
+    
+    return () => {
+      clearInterval(interval);
+    };
   }, [getAccounts]);
 
   useEffect(() => {
     if (accounts.length > 0) {
-      // Calculate total balance
-      const total = accounts.reduce((sum, account) => {
-        return sum + (account.balance_current || 0);
-      }, 0);
-      setTotalBalance(total);
+      try {
+        // Calculate total balance
+        const total = accounts.reduce((sum, account) => {
+          return sum + (account.balance_current || 0);
+        }, 0);
+        setTotalBalance(total);
 
-      // Group accounts by type for chart
-      const accountTypes: Record<string, number> = {};
-      accounts.forEach(account => {
-        const type = account.type.charAt(0).toUpperCase() + account.type.slice(1);
-        accountTypes[type] = (accountTypes[type] || 0) + (account.balance_current || 0);
-      });
+        // Group accounts by type for chart
+        const accountTypes: Record<string, number> = {};
+        accounts.forEach(account => {
+          const type = account.type.charAt(0).toUpperCase() + account.type.slice(1);
+          accountTypes[type] = (accountTypes[type] || 0) + (account.balance_current || 0);
+        });
 
-      // Convert to data array for chart
-      const chartData = Object.entries(accountTypes).map(([name, value], index) => ({
-        name,
-        value,
-        color: COLORS[index % COLORS.length]
-      }));
-      
-      setAccountTypeData(chartData);
+        // Convert to data array for chart
+        const chartData = Object.entries(accountTypes).map(([name, value], index) => ({
+          name,
+          value,
+          color: COLORS[index % COLORS.length]
+        }));
+        
+        setAccountTypeData(chartData);
+      } catch (err) {
+        console.error("Error processing account data:", err);
+        setError("Error processing financial data");
+      }
     }
   }, [accounts]);
 
@@ -62,6 +90,16 @@ export const FinancialOverview: React.FC = () => {
 
   const netWorth = assetTotal - liabilityTotal;
 
+  if (error) {
+    return (
+      <Alert variant="destructive" className="mb-6">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
@@ -80,7 +118,7 @@ export const FinancialOverview: React.FC = () => {
           ) : accounts.length === 0 ? (
             <div className="text-center py-6">
               <p className="text-sm text-muted-foreground">
-                Connect your accounts to see your financial summary
+                {isInitialLoad ? "Loading your accounts..." : "Connect your accounts to see your financial summary"}
               </p>
             </div>
           ) : (
@@ -136,7 +174,7 @@ export const FinancialOverview: React.FC = () => {
           ) : accounts.length === 0 ? (
             <div className="text-center py-6">
               <p className="text-sm text-muted-foreground">
-                Connect your accounts to see your account distribution
+                {isInitialLoad ? "Loading your accounts..." : "Connect your accounts to see your account distribution"}
               </p>
             </div>
           ) : (

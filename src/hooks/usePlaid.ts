@@ -143,31 +143,45 @@ export const usePlaid = () => {
   // Get user's connected accounts
   const getAccounts = async (itemId?: string): Promise<PlaidAccount[]> => {
     if (!user) {
-      toast({
-        title: 'Authentication Required',
-        description: 'You must be logged in to view accounts.',
-        variant: 'destructive',
-      });
+      console.log("No authenticated user found when attempting to get accounts");
       return [];
     }
 
     setLoading(true);
     try {
+      console.log("Fetching plaid accounts...");
       const queryString = itemId ? `?item_id=${itemId}` : '';
       
       const { data, error } = await supabase.functions.invoke(`plaid-get-accounts${queryString}`);
 
-      if (error) throw new Error(error.message);
+      if (error) {
+        console.error("Error response from plaid-get-accounts function:", error);
+        throw new Error(error.message || "Failed to fetch accounts");
+      }
       
-      setAccounts(data.accounts || []);
-      return data.accounts || [];
-    } catch (error) {
+      if (!data || !data.accounts) {
+        console.warn("No accounts data returned from plaid-get-accounts function");
+        setAccounts([]);
+        return [];
+      }
+      
+      console.log(`Successfully fetched ${data.accounts.length} accounts`);
+      setAccounts(data.accounts);
+      return data.accounts;
+    } catch (error: any) {
       console.error('Error fetching accounts:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load your financial accounts.',
-        variant: 'destructive',
-      });
+      // Toast the error but don't show it to the user if they haven't specifically requested accounts
+      // This prevents error toast spam on load
+      if (itemId) {
+        toast({
+          title: 'Error',
+          description: 'Failed to load your financial accounts.',
+          variant: 'destructive',
+        });
+      }
+      
+      // Return empty array rather than throwing to prevent component crashes
+      setAccounts([]);
       return [];
     } finally {
       setLoading(false);
