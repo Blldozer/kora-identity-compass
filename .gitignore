@@ -25,5 +25,10 @@ dist-ssr
 
 # Env files
 .env
+.env.local
+.env.*.local
 # Supabase MCP server global config
 %APPDATA%/supabase-mcp/.env
+
+# Cursor IDE files
+.cursor/
