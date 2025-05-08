@@ -29,6 +29,10 @@ dist-ssr
 .env.*.local
 # Supabase MCP server global config
 %APPDATA%/supabase-mcp/.env
+.env.*
 
+# Codeium config
+.codeium/
+windsurf/
 # Cursor IDE files
 .cursor/
