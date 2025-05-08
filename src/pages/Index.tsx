@@ -18,7 +18,7 @@ const Index = () => {
         
         <StatsCarousel />
         
-        <div className="space-y-4">
+        <div className="space-y-4 mt-8">
           {user ? (
             <Button 
               className="w-full h-12 text-lg bg-[#0A2463] hover:bg-[#0A2463]/90"

@@ -38,12 +38,14 @@ export const AuthPasswordInput = ({
           </Button>
         )}
       </div>
-      <div className="relative">
-        <Key className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+      <div className="relative flex items-center">
+        <div className="absolute left-3 pointer-events-none">
+          <Key className="h-4 w-4 text-muted-foreground" />
+        </div>
         <Input 
           type={showPassword ? "text" : "password"} 
           id="password"
-          className="pl-10 pr-10 p-3 text-base h-12"
+          className="pl-12 pr-12 p-3 text-base h-12"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           required 
@@ -53,11 +55,11 @@ export const AuthPasswordInput = ({
         />
         <button
           type="button"
-          className="absolute right-3 top-3.5 text-muted-foreground"
+          className="absolute right-3 text-muted-foreground"
           onClick={() => setShowPassword(!showPassword)}
           disabled={disabled}
         >
-          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       </div>
     </div>

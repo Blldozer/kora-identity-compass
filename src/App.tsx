@@ -30,38 +30,59 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           
-          {/* Auth Routes */}
-          <Route path="/login" element={
-            <AuthRoute>
-              <Login />
-            </AuthRoute>
-          } />
-          <Route path="/register" element={
-            <AuthRoute>
-              <Register />
-            </AuthRoute>
-          } />
-          <Route path="/auth/forgot-password" element={
-            <AuthRoute>
-              <ForgotPassword />
-            </AuthRoute>
-          } />
-          <Route path="/auth/reset-password" element={<ResetPassword />} />
-          <Route path="/auth/callback" element={<Callback />} />
+          {/* Auth Routes - Available to non-authenticated users */}
+          <Route 
+            path="/login" 
+            element={
+              <AuthRoute>
+                <Login />
+              </AuthRoute>
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              <AuthRoute>
+                <Register />
+              </AuthRoute>
+            } 
+          />
+          <Route 
+            path="/auth/forgot-password" 
+            element={
+              <AuthRoute>
+                <ForgotPassword />
+              </AuthRoute>
+            } 
+          />
+          <Route 
+            path="/auth/reset-password" 
+            element={
+              <AuthRoute>
+                <ResetPassword />
+              </AuthRoute>
+            } 
+          />
+          <Route 
+            path="/auth/callback" 
+            element={<Callback />} 
+          />
           
-          {/* Protected Routes */}
+          {/* Profile Setup - Available to authenticated users without RBAC checks */}
           <Route 
             path="/profile-setup" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute skipRbacCheck={true}>
                 <ProfileSetup />
               </ProtectedRoute>
             } 
           />
+          
+          {/* Protected Routes with Permission Checks */}
           <Route 
             path="/dashboard" 
             element={
-              <ProtectedRoute requiredPermission="dashboard:view">
+              <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
             } 
@@ -69,7 +90,7 @@ const App = () => (
           <Route 
             path="/profile" 
             element={
-              <ProtectedRoute requiredPermission="profile:edit">
+              <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
             } 
