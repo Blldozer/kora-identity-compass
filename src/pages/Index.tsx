@@ -26,11 +26,19 @@ const Index = () => {
           <StatsCarousel />
           
           {user && (
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center gap-4">
               <PlaidButton 
                 className="h-12 text-base"
                 variant="outline"
               />
+              <Button 
+                variant="outline" 
+                className="h-12 text-base"
+                onClick={() => navigate('/receipts')}
+              >
+                <Receipt className="h-5 w-5 mr-2" />
+                Capture Receipts
+              </Button>
             </div>
           )}
         </div>

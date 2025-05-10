@@ -15,6 +15,7 @@ import ResetPassword from "./pages/Auth/ResetPassword";
 import ProfileSetup from "./pages/Auth/ProfileSetup";
 import Dashboard from "./pages/Dashboard";
 import Finances from "./pages/Finances";
+import Receipts from "./pages/Receipts";
 import Profile from "./pages/Profile";
 import Unauthorized from "./pages/Unauthorized";
 import RolesAndPermissions from "./pages/Admin/RolesAndPermissions";
@@ -120,6 +121,14 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Finances />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/receipts" 
+                element={
+                  <ProtectedRoute>
+                    <Receipts />
                   </ProtectedRoute>
                 } 
               />

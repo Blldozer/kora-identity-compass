@@ -27,6 +27,14 @@ const config: CapacitorConfig = {
       androidSplashResourceName: "splash",
       splashFullScreen: true,
       splashImmersive: true
+    },
+    Camera: {
+      ios: {
+        usesGallery: true,
+      },
+      android: {
+        usesGallery: true,
+      }
     }
   }
 };
