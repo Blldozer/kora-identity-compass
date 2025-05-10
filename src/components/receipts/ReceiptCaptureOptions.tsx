@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Camera, Upload, Skeleton } from 'lucide-react';
+import { Camera, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ReceiptCaptureOptionsProps {
   onCameraCapture: () => void;
