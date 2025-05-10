@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { PlaidAccount } from '@/hooks/usePlaid';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const Finances = () => {
   const { user } = useAuth();
@@ -44,66 +45,74 @@ const Finances = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold">Your Finances</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your accounts, track spending, and monitor your financial health
-          </p>
-        </div>
-        
-        <div className="flex justify-between items-center mb-6">
-          {selectedAccount ? (
-            <div className="flex items-center">
-              <Button variant="ghost" onClick={handleBackToAccounts} className="mr-2">
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back to All Accounts
-              </Button>
-              <h2 className="text-xl font-medium">
-                {selectedAccount.plaid_items?.institution_name}: {selectedAccount.name}
-              </h2>
-            </div>
-          ) : (
-            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="accounts">Accounts</TabsTrigger>
-                <TabsTrigger value="transactions">Transactions</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          )}
-          
-          {!selectedAccount && (
-            <div>
-              <PlaidLink 
-                buttonText="Connect Account"
-                products={['auth', 'transactions', 'identity', 'investments', 'liabilities']}
-              />
-            </div>
-          )}
-        </div>
-
+    <div className="container mx-auto px-4 py-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold">Your Finances</h1>
+        <p className="text-muted-foreground mt-1">
+          Manage your accounts, track spending, and monitor your financial health
+        </p>
+      </div>
+      
+      <div className="flex justify-between items-center mb-6">
         {selectedAccount ? (
-          <TransactionsList accountId={selectedAccountId} limit={50} />
+          <div className="flex items-center">
+            <Button variant="ghost" onClick={handleBackToAccounts} className="mr-2">
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back to All Accounts
+            </Button>
+            <h2 className="text-xl font-medium">
+              {selectedAccount.plaid_items?.institution_name}: {selectedAccount.name}
+            </h2>
+          </div>
         ) : (
-          <Tabs value={activeTab}>
-            <TabsContent value="overview" className="mt-0">
-              <div className="space-y-6">
-                <FinancialOverview />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="accounts" className="mt-0">
-              <AccountsList onAccountClick={handleAccountClick} />
-            </TabsContent>
-            
-            <TabsContent value="transactions" className="mt-0">
-              <TransactionsList limit={25} />
-            </TabsContent>
+          <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full md:w-auto grid grid-cols-3">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="accounts">Accounts</TabsTrigger>
+              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            </TabsList>
           </Tabs>
         )}
+        
+        {!selectedAccount && (
+          <div className="hidden md:block">
+            <PlaidLink 
+              buttonText="Connect Account"
+              products={['auth', 'transactions', 'identity', 'investments', 'liabilities']}
+            />
+          </div>
+        )}
       </div>
+
+      {selectedAccount ? (
+        <TransactionsList accountId={selectedAccountId} limit={50} />
+      ) : (
+        <Tabs value={activeTab}>
+          <TabsContent value="overview" className="mt-0">
+            <div className="space-y-6">
+              <FinancialOverview />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="accounts" className="mt-0">
+            <AccountsList onAccountClick={handleAccountClick} />
+          </TabsContent>
+          
+          <TabsContent value="transactions" className="mt-0">
+            <TransactionsList limit={25} />
+          </TabsContent>
+        </Tabs>
+      )}
+      
+      {!selectedAccount && (
+        <div className="fixed bottom-20 left-0 w-full p-4 md:hidden">
+          <PlaidLink 
+            buttonText="Connect Account"
+            products={['auth', 'transactions', 'identity', 'investments', 'liabilities']}
+            className="w-full"
+          />
+        </div>
+      )}
     </div>
   );
 };

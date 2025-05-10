@@ -131,7 +131,11 @@ export default {
 				'fade-in': 'fade-in 0.5s ease-out',
 				'slide-in-right': 'slide-in-right 0.3s ease-out',
 				'pulse-soft': 'pulse-soft 2s infinite ease-in-out',
-			}
+			},
+			// Add safe area insets for mobile devices
+			padding: {
+				'safe': 'env(safe-area-inset-bottom)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
