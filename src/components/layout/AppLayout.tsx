@@ -2,6 +2,7 @@
 import React from 'react';
 import { BottomNav } from '@/components/ui/BottomNav';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
   children: React.ReactNode;
