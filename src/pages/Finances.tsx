@@ -87,7 +87,7 @@ const Finances = () => {
         {selectedAccount ? (
           <TransactionsList accountId={selectedAccountId} limit={50} />
         ) : (
-          <>
+          <Tabs value={activeTab}>
             <TabsContent value="overview" className="mt-0">
               <div className="space-y-6">
                 <FinancialOverview />
@@ -101,7 +101,7 @@ const Finances = () => {
             <TabsContent value="transactions" className="mt-0">
               <TransactionsList limit={25} />
             </TabsContent>
-          </>
+          </Tabs>
         )}
       </div>
     </div>
