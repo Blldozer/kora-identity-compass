@@ -96,6 +96,28 @@
 }
 
 @layer components {
+  /* Custom input placeholder positioning */
+  .placeholder-shifted::placeholder {
+    position: relative;
+    left: -100px;
+  }
+  
+  /* Email-specific placeholder positioning */
+  .email-placeholder-shifted::placeholder {
+    position: relative;
+    left: -130px;
+    text-align: center;
+  }
+  
+  /* Ensure cursor starts from the left */
+  .input-left-cursor {
+    text-align: left !important;
+  }
+  
+  .input-left-cursor::placeholder {
+    text-align: center;
+  }
+  
   /* Card styles for financial elements */
   .kora-card {
     @apply rounded-xl border border-border bg-card p-4 shadow-sm transition-all hover:shadow-md;

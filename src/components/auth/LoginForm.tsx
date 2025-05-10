@@ -72,13 +72,15 @@ export const LoginForm = () => {
       <div>
         <Label htmlFor="email" className="text-base">Email</Label>
         <div className="relative flex items-center">
-          <div className="absolute left-3 pointer-events-none">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-          </div>
+          {!email && (
+            <div className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none">
+              <Mail className="h-5 w-5 text-muted-foreground" />
+            </div>
+          )}
           <Input 
             type="email" 
             id="email"
-            className="pl-12 p-3 text-base h-12"
+            className={`p-3 text-base h-12 email-placeholder-shifted input-left-cursor ${email ? 'pl-4' : 'pl-10'} pr-4`}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required 
