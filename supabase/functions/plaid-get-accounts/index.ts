@@ -23,10 +23,16 @@ serve(async (req) => {
     
     if (!authHeader) {
       console.error("No authorization header provided");
-      return new Response(JSON.stringify({ error: 'No authorization header' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ 
+          error: 'Authentication required', 
+          details: 'No authorization header provided. Please login and try again.' 
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     // Create Supabase client
@@ -37,7 +43,10 @@ serve(async (req) => {
     if (!supabaseUrl || !supabaseAnonKey) {
       console.error("Missing Supabase environment variables");
       return new Response(
-        JSON.stringify({ error: 'Server configuration error', details: 'Missing environment variables' }),
+        JSON.stringify({ 
+          error: 'Server configuration error', 
+          details: 'Missing environment variables. Please contact support.' 
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -65,7 +74,10 @@ serve(async (req) => {
     if (userError) {
       console.error("Error getting user:", userError);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized', details: userError }),
+        JSON.stringify({ 
+          error: 'Authentication failed', 
+          details: userError.message || 'Unable to verify your identity. Please login again.' 
+        }),
         {
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -76,7 +88,10 @@ serve(async (req) => {
     if (!user) {
       console.error("No user found in session");
       return new Response(
-        JSON.stringify({ error: 'Unauthorized', details: 'No user found in session' }),
+        JSON.stringify({ 
+          error: 'Authentication failed', 
+          details: 'No user found in session. Please login again.' 
+        }),
         {
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -118,7 +133,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           error: 'Failed to retrieve accounts',
-          details: accountsError.message,
+          details: accountsError.message || 'Database error when retrieving accounts',
         }),
         {
           status: 500,
@@ -216,7 +231,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         error: 'Failed to fetch accounts',
-        details: error.message
+        details: error.message || 'An unexpected error occurred',
+        stack: isDevMode ? error.stack : undefined
       }),
       {
         status: 500,
