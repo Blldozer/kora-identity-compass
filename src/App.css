@@ -1,8 +1,24 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   text-align: center;
+}
+
+.kora-page-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.kora-background-gradient {
+  background: linear-gradient(135deg, rgba(242, 100, 25, 0.1) 0%, rgba(10, 36, 99, 0.05) 100%);
+}
+
+.kora-background-gradient-strong {
+  background: linear-gradient(135deg, rgba(242, 100, 25, 0.2) 0%, rgba(10, 36, 99, 0.1) 100%);
 }
 
 .logo {
@@ -12,10 +28,10 @@
   transition: filter 300ms;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em rgba(242, 100, 25, 0.6));
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em rgba(10, 36, 99, 0.6));
 }
 
 @keyframes logo-spin {
@@ -35,8 +51,32 @@
 
 .card {
   padding: 2em;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .read-the-docs {
   color: #888;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .card {
+    padding: 1.5em;
+  }
+  
+  .kora-mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .kora-mobile-bottom-padding {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
