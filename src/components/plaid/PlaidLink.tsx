@@ -1,6 +1,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import { usePlaid } from '@/hooks/usePlaid';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { toast } from '@/components/ui/use-toast';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle } from 'lucide-react';
 
 // Type declarations for Plaid Link
 declare global {
@@ -81,6 +82,7 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [scriptError, setScriptError] = useState<string | null>(null);
   const { createLinkToken, exchangePublicToken, connectionError, isDevelopmentMode } = usePlaid();
+  const { user } = useAuth();
 
   const isDevMode = isDevelopmentMode();
 
@@ -105,6 +107,16 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
   }, [loadScript]);
 
   const openPlaidLink = useCallback(async () => {
+    if (!user) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to connect your financial accounts.',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
     try {
       console.log("Requesting link token...");
@@ -161,9 +173,18 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
         variant: 'destructive',
       });
     }
-  }, [plaidLoaded, createLinkToken, exchangePublicToken, products, onSuccess]);
+  }, [user, plaidLoaded, createLinkToken, exchangePublicToken, products, onSuccess]);
 
   const handleConnect = () => {
+    if (!user) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to connect your financial accounts.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     if (!plaidLoaded) {
       setIsModalOpen(true);
       loadScript();
@@ -182,6 +203,9 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
 
   // If connectionError or scriptError, show an inline alert with error information
   const hasError = connectionError || scriptError;
+
+  // Check if user is authenticated
+  const authRequired = !user;
 
   return (
     <>
@@ -205,12 +229,22 @@ export const PlaidLink: React.FC<PlaidLinkProps> = ({
         </Alert>
       )}
       
+      {authRequired && (
+        <Alert variant="warning" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Authentication Required</AlertTitle>
+          <AlertDescription>
+            You need to sign in before connecting financial accounts.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <Button
         onClick={handleConnect}
         className={className}
         variant={variant}
         size={size}
-        disabled={isLoading}
+        disabled={isLoading || authRequired}
       >
         {isLoading ? 'Connecting...' : buttonText}
       </Button>
